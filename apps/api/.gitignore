@@ -1,0 +1,11 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/src/generated/prisma
+
+# Prisma init tarafından üretilen AI-agent referans dokümanları (vendor docs, proje kodu değil)
+/.agents
+/.claude/skills
+/.windsurf
+/skills-lock.json

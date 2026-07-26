@@ -1,0 +1,18 @@
+node_modules
+dist
+build
+.turbo
+.expo
+.env
+.env.local
+*.log
+*.tsbuildinfo
+
+# poc-face-match kendi ayrı Git reposu — burada ayrıca izlenmiyor
+/poc-face-match
+
+# eski PoC build çıktısı (büyük binary, bu monorepo'nun parçası değil)
+/build-output
+
+# Claude Code oturum durumu
+/.claude
