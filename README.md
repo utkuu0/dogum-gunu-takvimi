@@ -356,6 +356,115 @@ olarak ekstra bir sertifika/key adımı gerekiyor:
 4. Fiziksel bir iOS cihazda test etmen gerekiyor — push bildirimler simülatörde (Xcode 15+ bazı sınırlı
    senaryolar hariç) genelde çalışmaz.
 
+## Deploy — backend (Adım 11)
+
+Backend, `apps/api/Dockerfile`'daki çok aşamalı (multi-stage) build ile bir Docker imajına
+alınıyor ve `infra/docker-compose.prod.yml` ile `api` + `postgres` + `redis` + `caddy`
+(otomatik HTTPS reverse proxy) olarak ayağa kalkıyor. Mobil tarafın deploy'u (EAS Build,
+Store'a yükleme) henüz yapılmadı — bu adım sadece backend'i kapsıyor.
+
+### Dockerfile nasıl çalışıyor
+
+Monorepo pnpm workspace + Turborepo kullandığı için imaj, Turborepo'nun resmi
+[Docker rehberi](https://turborepo.dev/docs/guides/tools/docker)ndeki `turbo prune` deseniyle
+kuruluyor — **build context repo kökü olmalı** (`apps/api` değil):
+
+```bash
+docker build -f apps/api/Dockerfile -t dogumgunu-api .
+```
+
+Aşamalar:
+1. **pruner** — `turbo prune @dogum-gunu/api --docker` ile sadece `apps/api` ve
+   `packages/shared`'ın (transitive bağımlılığı) dosyaları + budanmış bir lockfile ayıklanıyor;
+   `apps/mobile` ve onun ağır native bağımlılıkları imaja hiç girmiyor.
+2. **installer** — budanmış lockfile'la tüm bağımlılıklar (dev dahil) kuruluyor, `prisma
+   generate` çalıştırılıyor (DB'ye bağlanmıyor, sadece `DATABASE_URL`'in env'de tanımlı
+   olmasını bekliyor — build-arg olarak sahte bir değer veriliyor) ve `turbo run build` ile
+   hem `packages/shared` hem `apps/api` derleniyor.
+3. **runner** — sadece production bağımlılıkları (`--prod`) + derlenmiş `dist` klasörleri
+   kopyalanıyor, `dumb-init` ile non-root bir kullanıcı (`nestjs`) altında `node
+   apps/api/dist/main.js` çalıştırılıyor. `node_modules` üzerinde `chown -R` **kasıtlı
+   olarak yok** — Alpine'de root tarafından kurulan dosyalar varsayılan umask ile zaten
+   world-readable, `chown -R` 900+ paketlik ağaçta ~9 dakika sürüyordu, kaldırılınca build
+   35 saniyeye indi.
+
+Migration'lar imajın kendisinde **değil**, ayrı bir `migrate` compose servisinde çalışıyor —
+bu servis `installer` aşamasını (`target: installer`, Prisma CLI dahil tüm dev bağımlılıklar
+mevcut) kullanıyor, production `runner` imajı ise yalın kalıyor (Prisma CLI'sız).
+
+Bu üç aşama da lokalde build + gerçek bir Postgres/Redis'e karşı `/health` ile uçtan uca
+doğrulandı.
+
+### Hetzner VPS — ilk kurulum
+
+```bash
+# 1. Docker kurulumu (Ubuntu 22.04/24.04)
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER   # yeniden login gerektirir
+
+# 2. Firewall — sadece SSH, HTTP, HTTPS açık
+sudo ufw allow OpenSSH
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+
+# 3. Repoyu klonla (deploy script'i bu path'i bekliyor: /opt/dogumgunu)
+sudo mkdir -p /opt/dogumgunu && sudo chown $USER:$USER /opt/dogumgunu
+git clone <repo-url> /opt/dogumgunu
+cd /opt/dogumgunu/infra
+
+# 4. Production env dosyası
+cp .env.example .env
+nano .env   # POSTGRES_PASSWORD, DOMAIN, JWT_*_SECRET, GOOGLE_*, FIREBASE_*'ı doldur
+
+# 5. DNS: DOMAIN'in A kaydı bu VPS'in IP'sine işaret etmeli (Caddy sertifikayı buna göre alır)
+
+# 6. İlk build + migration + ayağa kaldırma
+docker compose -f docker-compose.prod.yml build api
+docker compose -f docker-compose.prod.yml run --rm migrate
+docker compose -f docker-compose.prod.yml up -d
+
+# Doğrulama
+curl https://$DOMAIN/health   # {"status":"ok","database":"up"}
+```
+
+`postgres`/`redis`/`api` servisleri `internal` ağında izole, dışarıya sadece `caddy`'nin
+80/443 portları açık — `api`'ye doğrudan host portundan erişilemiyor, her şey Caddy üzerinden.
+
+### GitHub Actions CI/CD (`.github/workflows/api-deploy.yml`)
+
+- **`test`** job'ı: `apps/api`, `packages/shared` ya da lockfile değişen her push/PR'da lint +
+  typecheck + unit test + (gerçek Postgres/Redis service container'larına karşı) e2e test
+  çalıştırır.
+- **`deploy`** job'ı: sadece `main`'e push'ta ve `test` geçtiğinde, `appleboy/ssh-action` ile
+  VPS'e bağlanıp `git reset --hard origin/main` + `docker compose build api` + `run --rm
+  migrate` + `up -d` çalıştırır.
+
+Gereken repo secret'ları (**Settings → Secrets and variables → Actions**):
+- `HETZNER_HOST` — VPS'in IP/domaini
+- `HETZNER_USER` — SSH kullanıcısı (deploy için ayrı, sınırlı yetkili bir kullanıcı önerilir)
+- `HETZNER_SSH_KEY` — bu kullanıcı için oluşturulmuş, **parolasız** bir SSH private key'i;
+  ilgili public key VPS'teki `~/.ssh/authorized_keys`'e eklenmiş olmalı
+
+`git reset --hard` sadece `/opt/dogumgunu`'daki deploy checkout'unu hedefliyor — orası elle
+düzenlenmemesi gereken, salt CI'ın push ettiği bir klon olarak düşünülmeli.
+
+### Günlük Postgres yedeği (`infra/backup-postgres.sh`)
+
+`docker compose exec postgres pg_dump` ile gzip'li bir dump alıp `infra/backups/`'a yazar,
+`BACKUP_RETENTION_DAYS` (varsayılan 14 gün) üzerinde kalanları siler. VPS'te crontab'a ekle:
+
+```bash
+crontab -e
+# her gece 03:00
+0 3 * * * cd /opt/dogumgunu/infra && ./backup-postgres.sh >> /var/log/dogumgunu-backup.log 2>&1
+```
+
+Script + `docker compose config` doğrulaması, tam compose stack'i (postgres + redis + api +
+migrate) lokalde gerçek konteynerlerle uçtan uca test edildi; `caddy` servisi gerçek bir
+domain gerektirdiği için lokalde denenmedi (Caddyfile tek satır, `reverse_proxy api:3000` —
+riskli bir kısım değil).
+
 ## Paket yapısı notları
 
 - Ortak TS ayarları `tsconfig.base.json`'da; `packages/shared` ve `apps/api` bunu `extends` eder.

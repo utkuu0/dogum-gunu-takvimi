@@ -14,5 +14,8 @@ build
 # eski PoC build çıktısı (büyük binary, bu monorepo'nun parçası değil)
 /build-output
 
+# Production Postgres yedekleri (infra/backup-postgres.sh) — VPS'te tutulur, repoya girmez
+/infra/backups
+
 # Claude Code oturum durumu
 /.claude

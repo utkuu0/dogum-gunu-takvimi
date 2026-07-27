@@ -1,0 +1,101 @@
+name: API CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.github/workflows/api-deploy.yml'
+  pull_request:
+    paths:
+      - 'apps/api/**'
+      - 'packages/shared/**'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+
+concurrency:
+  group: api-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: dogumgunu
+          POSTGRES_PASSWORD: dogumgunu
+          POSTGRES_DB: dogumgunu
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U dogumgunu"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://dogumgunu:dogumgunu@localhost:5432/dogumgunu?schema=public
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      JWT_ACCESS_SECRET: ci-access-secret
+      JWT_REFRESH_SECRET: ci-refresh-secret
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm --filter @dogum-gunu/shared build
+
+      - run: pnpm --filter @dogum-gunu/api exec prisma generate
+
+      - run: pnpm --filter @dogum-gunu/api lint
+
+      - run: pnpm --filter @dogum-gunu/api typecheck
+
+      - run: pnpm --filter @dogum-gunu/api test
+
+      - name: Apply migrations to test database
+        run: pnpm --filter @dogum-gunu/api db:migrate:deploy
+
+      - run: pnpm --filter @dogum-gunu/api test:e2e
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Hetzner VPS over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.HETZNER_HOST }}
+          username: ${{ secrets.HETZNER_USER }}
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/dogumgunu
+            git fetch origin main
+            git reset --hard origin/main
+            cd infra
+            docker compose -f docker-compose.prod.yml build api
+            docker compose -f docker-compose.prod.yml run --rm migrate
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f

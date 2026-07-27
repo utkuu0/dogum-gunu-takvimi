@@ -1,0 +1,29 @@
+# Build context apps/api/Dockerfile için repo kökü — turbo prune zaten sadece
+# @dogum-gunu/api'nin ihtiyaç duyduğu paketleri seçiyor, burada asıl amaç ağır/gereksiz
+# dosyaları COPY . . öncesi elemek (build context boyutu ve önbellek isabeti için).
+
+**/node_modules
+**/dist
+**/.turbo
+**/.expo
+**/coverage
+**/*.tsbuildinfo
+.git
+.github
+
+# Bu monorepo'nun parçası değil (ayrı repo / eski PoC çıktısı — kök .gitignore'da da hariç)
+poc-face-match
+build-output
+
+# Mobil uygulamanın native/build klasörleri backend imajı için gereksiz
+apps/mobile/android
+apps/mobile/ios
+apps/mobile/.expo
+
+.env
+.env.*
+!.env.example
+!apps/api/.env.example
+
+*.log
+.DS_Store
