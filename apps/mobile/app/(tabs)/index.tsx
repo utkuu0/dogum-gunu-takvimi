@@ -45,7 +45,7 @@ export default function UpcomingBirthdaysScreen() {
         ListHeaderComponent={
           data?.length ? (
             <View style={styles.listHeader}>
-              <Text style={styles.listHeaderTitle}>Yaklaşanlar 🎈</Text>
+              <Text style={styles.listHeaderTitle}>Yaklaşanlar</Text>
               <View style={styles.countPill}>
                 <Text style={styles.countPillText}>{data.length}</Text>
               </View>
@@ -84,7 +84,7 @@ export default function UpcomingBirthdaysScreen() {
                 </View>
                 <View style={[styles.badge, isToday && styles.badgeToday]}>
                   <Text style={[styles.badgeText, isToday && styles.badgeTextToday]}>
-                    {isToday ? '🎉 Bugün' : `${item.daysUntil} gün`}
+                    {isToday ? 'Bugün' : `${item.daysUntil} gün`}
                   </Text>
                 </View>
               </Pressable>

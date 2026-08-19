@@ -148,12 +148,12 @@ export default function FriendDetailScreen() {
           <Avatar name={data.name} photoUrl={data.photoUrl} size={84} />
         </View>
         <Text style={styles.name}>{data.name}</Text>
-        <Text style={styles.meta}>🎂 {format(new Date(data.birthDate), 'd MMMM yyyy', { locale: tr })}</Text>
+        <Text style={styles.meta}>{format(new Date(data.birthDate), 'd MMMM yyyy', { locale: tr })}</Text>
       </View>
 
       {data.notes && (
         <View style={styles.notesBox}>
-          <Text style={styles.notesLabel}>📝 Not</Text>
+          <Text style={styles.notesLabel}>Not</Text>
           <Text style={styles.notes}>{data.notes}</Text>
         </View>
       )}

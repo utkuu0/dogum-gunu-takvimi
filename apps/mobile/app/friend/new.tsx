@@ -211,7 +211,7 @@ export default function NewFriendScreen() {
       </View>
 
       <Pressable style={styles.button} onPress={handleSubmit} disabled={isPending}>
-        {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>🎉 Kaydet</Text>}
+        {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Kaydet</Text>}
       </Pressable>
     </ScrollView>
   );

@@ -65,10 +65,7 @@ export default function SettingsScreen() {
         </View>
       )}
 
-      <View style={styles.groupHeader}>
-        <Text style={styles.groupEmoji}>🔔</Text>
-        <Text style={styles.groupLabel}>Bildirimler</Text>
-      </View>
+      <Text style={styles.groupLabel}>Bildirimler</Text>
       <View style={styles.card}>
         <View style={styles.row}>
           <View style={styles.rowText}>
@@ -87,10 +84,7 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      <View style={styles.groupHeader}>
-        <Text style={styles.groupEmoji}>🎯</Text>
-        <Text style={styles.groupLabel}>Yüz Tanıma</Text>
-      </View>
+      <Text style={styles.groupLabel}>Yüz Tanıma</Text>
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Galeride bul eşik değeri</Text>
         <Text style={styles.sectionHint}>
@@ -106,7 +100,7 @@ export default function SettingsScreen() {
       </View>
 
       <Pressable style={styles.signOutButton} onPress={() => signOut()}>
-        <Text style={styles.signOutText}>👋 Çıkış Yap</Text>
+        <Text style={styles.signOutText}>Çıkış Yap</Text>
       </Pressable>
     </ScrollView>
   );
@@ -147,20 +141,12 @@ const styles = StyleSheet.create({
     ...typography.caption,
     marginTop: 2,
   },
-  groupHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginBottom: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-  groupEmoji: {
-    fontSize: 14,
-  },
   groupLabel: {
     ...typography.small,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
   },
   card: {
     backgroundColor: colors.surface,

@@ -63,7 +63,7 @@ export default function LoginScreen() {
         </View>
 
         <Text style={styles.title}>Doğum Günü{'\n'}Takvimi</Text>
-        <Text style={styles.subtitle}>Arkadaşlarının doğum günlerini{'\n'}asla kaçırma! 🎁</Text>
+        <Text style={styles.subtitle}>Arkadaşlarının doğum günlerini{'\n'}asla kaçırma.</Text>
 
         <Pressable style={styles.button} onPress={handleSignIn} disabled={signingIn}>
           {signingIn ? (
@@ -78,7 +78,7 @@ export default function LoginScreen() {
           )}
         </Pressable>
 
-        <Text style={styles.footnote}>Giriş yaparak partiyi kaçırmayacaksın 🎉</Text>
+        <Text style={styles.footnote}>Giriş yaparak partiyi kaçırmayacaksın.</Text>
       </View>
     </SafeAreaView>
   );

@@ -27,15 +27,15 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: '🏠 Ana Sayfa', tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} /> }}
+        options={{ title: 'Ana Sayfa', tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} /> }}
       />
       <Tabs.Screen
         name="calendar"
-        options={{ title: '📅 Takvim', tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} /> }}
+        options={{ title: 'Takvim', tabBarIcon: ({ focused }) => <TabIcon emoji="📅" focused={focused} /> }}
       />
       <Tabs.Screen
         name="settings"
-        options={{ title: '⚙️ Ayarlar', tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" focused={focused} /> }}
+        options={{ title: 'Ayarlar', tabBarIcon: ({ focused }) => <TabIcon emoji="⚙️" focused={focused} /> }}
       />
     </Tabs>
   );
