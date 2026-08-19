@@ -162,7 +162,7 @@ export default function NewFriendScreen() {
           <Image source={{ uri: photoUrl }} style={styles.photoPreview} />
         ) : (
           <View style={styles.photoPlaceholder}>
-            <Text style={styles.photoPlaceholderText}>📷</Text>
+            <Text style={styles.photoPlaceholderText}>🎂</Text>
           </View>
         )}
         <Text style={styles.photoLabel}>Fotoğraf ekle</Text>
@@ -210,12 +210,8 @@ export default function NewFriendScreen() {
         />
       </View>
 
-      <Pressable
-        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
-        onPress={handleSubmit}
-        disabled={isPending}
-      >
-        {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Kaydet</Text>}
+      <Pressable style={styles.button} onPress={handleSubmit} disabled={isPending}>
+        {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>🎉 Kaydet</Text>}
       </Pressable>
     </ScrollView>
   );
@@ -235,23 +231,25 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
   },
   photoPreview: {
-    width: 100,
-    height: 100,
+    width: 104,
+    height: 104,
     borderRadius: radius.full,
+    borderWidth: 3,
+    borderColor: colors.accent,
   },
   photoPlaceholder: {
-    width: 100,
-    height: 100,
+    width: 104,
+    height: 104,
     borderRadius: radius.full,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: colors.primary,
     borderStyle: 'dashed',
   },
   photoPlaceholderText: {
-    fontSize: 32,
+    fontSize: 36,
   },
   photoLabel: {
     ...typography.caption,
@@ -268,7 +266,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.background,
     borderRadius: radius.sm,
@@ -298,22 +296,19 @@ const styles = StyleSheet.create({
   },
   doneButtonText: {
     color: colors.primary,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   button: {
     marginTop: spacing.xl,
     backgroundColor: colors.primary,
-    paddingVertical: 16,
+    paddingVertical: 17,
     borderRadius: radius.full,
     alignItems: 'center',
     ...shadow,
   },
-  buttonPressed: {
-    backgroundColor: colors.primaryDark,
-  },
   buttonText: {
     color: colors.white,
-    fontWeight: '700',
+    fontWeight: '800',
     fontSize: 16,
   },
 });

@@ -45,8 +45,10 @@ export default function UpcomingBirthdaysScreen() {
         ListHeaderComponent={
           data?.length ? (
             <View style={styles.listHeader}>
-              <Text style={styles.listHeaderTitle}>Yaklaşan Doğum Günleri</Text>
-              <Text style={styles.listHeaderCount}>{data.length}</Text>
+              <Text style={styles.listHeaderTitle}>Yaklaşanlar 🎈</Text>
+              <View style={styles.countPill}>
+                <Text style={styles.countPillText}>{data.length}</Text>
+              </View>
             </View>
           ) : null
         }
@@ -64,13 +66,15 @@ export default function UpcomingBirthdaysScreen() {
             </Link>
           </View>
         }
-        renderItem={({ item }) => {
+        renderItem={({ item, index }) => {
           const isToday = item.daysUntil === 0;
           const formattedDate = format(new Date(item.birthDate), 'd MMMM', { locale: tr });
+          const stripeColor = STRIPE_COLORS[index % STRIPE_COLORS.length];
 
           return (
             <Link href={{ pathname: '/friend/[id]', params: { id: item.friendId } }} asChild>
               <Pressable style={[styles.card, isToday && styles.cardToday]}>
+                <View style={[styles.stripe, { backgroundColor: isToday ? colors.accent : stripeColor }]} />
                 <Avatar name={item.name} photoUrl={item.photoUrl} ring={isToday} />
                 <View style={styles.cardTextGroup}>
                   <Text style={styles.cardName}>{item.name}</Text>
@@ -98,6 +102,8 @@ export default function UpcomingBirthdaysScreen() {
   );
 }
 
+const STRIPE_COLORS = [colors.primary, colors.secondary, colors.accent];
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -112,6 +118,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: spacing.lg,
+    paddingBottom: 120,
     gap: spacing.md,
   },
   emptyList: {
@@ -125,21 +132,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
   },
   listHeaderTitle: {
-    ...typography.heading,
+    ...typography.title,
+    fontSize: 22,
   },
-  listHeaderCount: {
-    ...typography.caption,
-    backgroundColor: colors.primaryLight,
-    color: colors.primary,
-    fontWeight: '800',
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 2,
+  countPill: {
+    backgroundColor: colors.secondary,
+    minWidth: 28,
+    height: 28,
     borderRadius: radius.full,
-    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.sm,
+  },
+  countPillText: {
+    color: colors.white,
+    fontWeight: '800',
+    fontSize: 13,
   },
   emptyIconCircle: {
-    width: 88,
-    height: 88,
+    width: 96,
+    height: 96,
     borderRadius: radius.full,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',
@@ -147,7 +159,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   emptyIconEmoji: {
-    fontSize: 40,
+    fontSize: 44,
   },
   emptyTitle: {
     ...typography.heading,
@@ -159,18 +171,15 @@ const styles = StyleSheet.create({
   },
   emptyButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 14,
+    paddingVertical: 15,
     paddingHorizontal: spacing.xl,
     borderRadius: radius.full,
     marginTop: spacing.sm,
     ...shadow,
   },
-  buttonPressed: {
-    backgroundColor: colors.primaryDark,
-  },
   emptyButtonText: {
     color: colors.white,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   errorEmoji: {
     fontSize: 36,
@@ -185,18 +194,22 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: spacing.md,
+    overflow: 'hidden',
     ...shadowSm,
   },
-  cardPressed: {
-    opacity: 0.85,
+  stripe: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 6,
   },
   cardToday: {
     backgroundColor: colors.accentLight,
-    borderWidth: 1.5,
-    borderColor: colors.accent,
   },
   cardTextGroup: {
     flex: 1,
+    marginLeft: spacing.xs,
   },
   cardName: {
     ...typography.subheading,
@@ -217,25 +230,24 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     color: colors.textSecondary,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   badgeTextToday: {
     color: colors.white,
   },
   fab: {
     position: 'absolute',
-    right: 20,
-    bottom: 20,
-    width: 58,
-    height: 58,
+    right: 24,
+    bottom: 104,
+    width: 60,
+    height: 60,
     borderRadius: radius.full,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: colors.surface,
     ...shadow,
-  },
-  fabPressed: {
-    backgroundColor: colors.primaryDark,
   },
   fabText: {
     color: colors.white,

@@ -55,7 +55,9 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {user && (
         <View style={styles.profileCard}>
-          <Avatar name={user.name} size={56} />
+          <View style={styles.profileRingWrap}>
+            <Avatar name={user.name} size={60} />
+          </View>
           <View style={styles.profileText}>
             <Text style={styles.name}>{user.name}</Text>
             <Text style={styles.email}>{user.email}</Text>
@@ -63,7 +65,10 @@ export default function SettingsScreen() {
         </View>
       )}
 
-      <Text style={styles.groupLabel}>Bildirimler</Text>
+      <View style={styles.groupHeader}>
+        <Text style={styles.groupEmoji}>🔔</Text>
+        <Text style={styles.groupLabel}>Bildirimler</Text>
+      </View>
       <View style={styles.card}>
         <View style={styles.row}>
           <View style={styles.rowText}>
@@ -82,7 +87,10 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      <Text style={styles.groupLabel}>Yüz Tanıma</Text>
+      <View style={styles.groupHeader}>
+        <Text style={styles.groupEmoji}>🎯</Text>
+        <Text style={styles.groupLabel}>Yüz Tanıma</Text>
+      </View>
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Galeride bul eşik değeri</Text>
         <Text style={styles.sectionHint}>
@@ -97,11 +105,8 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <Pressable
-        style={({ pressed }) => [styles.signOutButton, pressed && styles.signOutButtonPressed]}
-        onPress={() => signOut()}
-      >
-        <Text style={styles.signOutText}>Çıkış Yap</Text>
+      <Pressable style={styles.signOutButton} onPress={() => signOut()}>
+        <Text style={styles.signOutText}>👋 Çıkış Yap</Text>
       </Pressable>
     </ScrollView>
   );
@@ -114,7 +119,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: spacing.lg,
-    paddingBottom: spacing.xxl,
+    paddingBottom: 130,
   },
   profileCard: {
     flexDirection: 'row',
@@ -126,6 +131,12 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xl,
     ...shadowSm,
   },
+  profileRingWrap: {
+    padding: 3,
+    borderRadius: radius.full,
+    borderWidth: 2,
+    borderColor: colors.accent,
+  },
   profileText: {
     flex: 1,
   },
@@ -136,12 +147,20 @@ const styles = StyleSheet.create({
     ...typography.caption,
     marginTop: 2,
   },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
+  },
+  groupEmoji: {
+    fontSize: 14,
+  },
   groupLabel: {
     ...typography.small,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    marginLeft: spacing.xs,
   },
   card: {
     backgroundColor: colors.surface,
@@ -168,7 +187,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.background,
     borderRadius: radius.sm,
@@ -176,18 +195,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: 100,
     fontSize: 15,
+    fontWeight: '700',
+    color: colors.textPrimary,
   },
   signOutButton: {
     backgroundColor: colors.dangerLight,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: radius.full,
     alignItems: 'center',
   },
-  signOutButtonPressed: {
-    opacity: 0.7,
-  },
   signOutText: {
     color: colors.dangerDark,
-    fontWeight: '700',
+    fontWeight: '800',
   },
 });

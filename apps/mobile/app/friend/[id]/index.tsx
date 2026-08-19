@@ -144,14 +144,16 @@ export default function FriendDetailScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Avatar name={data.name} photoUrl={data.photoUrl} size={84} />
+        <View style={styles.avatarRing}>
+          <Avatar name={data.name} photoUrl={data.photoUrl} size={84} />
+        </View>
         <Text style={styles.name}>{data.name}</Text>
-        <Text style={styles.meta}>{format(new Date(data.birthDate), 'd MMMM yyyy', { locale: tr })}</Text>
+        <Text style={styles.meta}>🎂 {format(new Date(data.birthDate), 'd MMMM yyyy', { locale: tr })}</Text>
       </View>
 
       {data.notes && (
         <View style={styles.notesBox}>
-          <Text style={styles.notesLabel}>Not</Text>
+          <Text style={styles.notesLabel}>📝 Not</Text>
           <Text style={styles.notes}>{data.notes}</Text>
         </View>
       )}
@@ -165,14 +167,10 @@ export default function FriendDetailScreen() {
       )}
 
       <View style={styles.actions}>
-        <Pressable style={({ pressed }) => [styles.editButton, pressed && styles.pressed]} onPress={() => setIsEditing(true)}>
+        <Pressable style={styles.editButton} onPress={() => setIsEditing(true)}>
           <Text style={styles.editButtonText}>Düzenle</Text>
         </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
-          onPress={confirmDelete}
-          disabled={deleteMutation.isPending}
-        >
+        <Pressable style={styles.deleteButton} onPress={confirmDelete} disabled={deleteMutation.isPending}>
           <Text style={styles.deleteButtonText}>Sil</Text>
         </Pressable>
       </View>
@@ -277,10 +275,10 @@ function EditFriendForm({ friend, isSaving, onCancel, onSave }: EditFriendFormPr
       </View>
 
       <View style={styles.actions}>
-        <Pressable style={({ pressed }) => [styles.editButton, pressed && styles.pressed]} onPress={onCancel} disabled={isSaving}>
+        <Pressable style={styles.editButton} onPress={onCancel} disabled={isSaving}>
           <Text style={styles.editButtonText}>Vazgeç</Text>
         </Pressable>
-        <Pressable style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]} onPress={handleSave} disabled={isSaving}>
+        <Pressable style={styles.saveButton} onPress={handleSave} disabled={isSaving}>
           {isSaving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveButtonText}>Kaydet</Text>}
         </Pressable>
       </View>
@@ -310,6 +308,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     marginTop: spacing.sm,
   },
+  avatarRing: {
+    padding: 4,
+    borderRadius: radius.full,
+    borderWidth: 3,
+    borderColor: colors.accent,
+    marginBottom: spacing.xs,
+  },
   name: {
     ...typography.title,
     fontSize: 22,
@@ -335,18 +340,15 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   scanButton: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: colors.secondaryLight,
     borderRadius: radius.full,
-    paddingVertical: 14,
+    paddingVertical: 15,
     alignItems: 'center',
     marginBottom: spacing.sm,
   },
   scanButtonText: {
-    color: colors.primary,
-    fontWeight: '700',
-  },
-  pressed: {
-    opacity: 0.75,
+    color: colors.secondaryDark,
+    fontWeight: '800',
   },
   actions: {
     flexDirection: 'row',
@@ -355,38 +357,38 @@ const styles = StyleSheet.create({
   },
   editButton: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: radius.full,
     alignItems: 'center',
     backgroundColor: colors.background,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
   },
   editButtonText: {
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.textPrimary,
   },
   deleteButton: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: radius.full,
     alignItems: 'center',
     backgroundColor: colors.dangerLight,
   },
   deleteButtonText: {
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.dangerDark,
   },
   saveButton: {
     flex: 1,
-    paddingVertical: 14,
+    paddingVertical: 15,
     borderRadius: radius.full,
     alignItems: 'center',
     backgroundColor: colors.primary,
     ...shadowSm,
   },
   saveButtonText: {
-    fontWeight: '700',
+    fontWeight: '800',
     color: colors.white,
   },
   photoPicker: {
@@ -408,7 +410,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.background,
     borderRadius: radius.sm,
@@ -434,7 +436,7 @@ const styles = StyleSheet.create({
   },
   doneButtonText: {
     color: colors.primary,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   errorText: {
     color: colors.dangerDark,

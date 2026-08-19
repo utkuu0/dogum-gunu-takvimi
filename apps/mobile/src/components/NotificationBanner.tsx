@@ -18,7 +18,7 @@ export function NotificationBanner({ title, body, onPress, onDismiss }: Notifica
 
   return (
     <SafeAreaView style={styles.container} pointerEvents="box-none">
-      <Pressable style={({ pressed }) => [styles.banner, pressed && styles.bannerPressed]} onPress={onPress}>
+      <Pressable style={styles.banner} onPress={onPress}>
         <View style={styles.iconCircle}>
           <Text style={styles.icon}>🎂</Text>
         </View>
@@ -45,19 +45,18 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     marginHorizontal: spacing.md,
     marginTop: spacing.sm,
-    backgroundColor: colors.textPrimary,
+    backgroundColor: colors.secondaryDark,
     borderRadius: radius.lg,
     padding: spacing.md,
+    borderWidth: 2,
+    borderColor: colors.accent,
     ...shadow,
   },
-  bannerPressed: {
-    opacity: 0.9,
-  },
   iconCircle: {
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -69,10 +68,10 @@ const styles = StyleSheet.create({
   },
   title: {
     color: colors.white,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   body: {
-    color: '#E5E7EB',
+    color: '#EDE9FE',
     marginTop: 2,
     fontSize: 13,
   },

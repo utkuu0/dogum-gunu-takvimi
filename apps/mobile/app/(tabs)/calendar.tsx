@@ -43,7 +43,7 @@ export default function CalendarScreen() {
       if (birth.getMonth() + 1 !== visibleMonth.month) continue;
 
       const key = toDateKey(visibleMonth.year, visibleMonth.month, birth.getDate());
-      marks[key] = { marked: true, dotColor: colors.primary };
+      marks[key] = { marked: true, dotColor: colors.accent };
     }
     return marks;
   }, [data, visibleMonth]);
@@ -85,16 +85,16 @@ export default function CalendarScreen() {
           onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
           markedDates={{
             ...markedDates,
-            [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: colors.primary },
+            [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: colors.secondary },
           }}
           theme={{
             todayTextColor: colors.primary,
-            arrowColor: colors.primary,
-            textMonthFontWeight: '800',
-            textDayFontWeight: '600',
-            textDayHeaderFontWeight: '700',
-            selectedDayBackgroundColor: colors.primary,
-            dotColor: colors.primary,
+            arrowColor: colors.secondary,
+            textMonthFontWeight: '900',
+            textDayFontWeight: '700',
+            textDayHeaderFontWeight: '800',
+            selectedDayBackgroundColor: colors.secondary,
+            dotColor: colors.accent,
             monthTextColor: colors.textPrimary,
             textSectionTitleColor: colors.textMuted,
           }}
@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
   panel: {
     flex: 1,
     padding: spacing.lg,
+    paddingBottom: 110,
   },
   panelTitle: {
     ...typography.heading,
@@ -184,13 +185,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: radius.md,
   },
-  friendRowPressed: {
-    backgroundColor: colors.background,
-  },
   friendName: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.textPrimary,
   },
   friendChevron: {
