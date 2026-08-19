@@ -8,6 +8,7 @@ import { tr } from 'date-fns/locale';
 import type { Birthday } from '@dogum-gunu/shared';
 import { apiClient } from '../../src/api/client';
 import { Avatar } from '../../src/components/Avatar';
+import { colors, radius, shadowSm, spacing, typography } from '../../src/theme/theme';
 import '../../src/utils/calendarLocale';
 
 function pad(value: number): string {
@@ -42,7 +43,7 @@ export default function CalendarScreen() {
       if (birth.getMonth() + 1 !== visibleMonth.month) continue;
 
       const key = toDateKey(visibleMonth.year, visibleMonth.month, birth.getDate());
-      marks[key] = { marked: true, dotColor: '#2563eb' };
+      marks[key] = { marked: true, dotColor: colors.primary };
     }
     return marks;
   }, [data, visibleMonth]);
@@ -62,7 +63,7 @@ export default function CalendarScreen() {
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -77,32 +78,48 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <Calendar
-        current={selectedDate}
-        onMonthChange={(month: DateData) => setVisibleMonth({ year: month.year, month: month.month })}
-        onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
-        markedDates={{
-          ...markedDates,
-          [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: '#2563eb' },
-        }}
-        theme={{ todayTextColor: '#2563eb', arrowColor: '#2563eb' }}
-      />
+      <View style={styles.calendarCard}>
+        <Calendar
+          current={selectedDate}
+          onMonthChange={(month: DateData) => setVisibleMonth({ year: month.year, month: month.month })}
+          onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
+          markedDates={{
+            ...markedDates,
+            [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: colors.primary },
+          }}
+          theme={{
+            todayTextColor: colors.primary,
+            arrowColor: colors.primary,
+            textMonthFontWeight: '800',
+            textDayFontWeight: '600',
+            textDayHeaderFontWeight: '700',
+            selectedDayBackgroundColor: colors.primary,
+            dotColor: colors.primary,
+            monthTextColor: colors.textPrimary,
+            textSectionTitleColor: colors.textMuted,
+          }}
+        />
+      </View>
 
       <View style={styles.panel}>
-        <Text style={styles.panelTitle}>
-          {format(new Date(selectedDate), 'd MMMM', { locale: tr })}
-        </Text>
+        <Text style={styles.panelTitle}>{format(new Date(selectedDate), 'd MMMM', { locale: tr })}</Text>
 
         <FlatList
           data={selectedDayFriends}
           keyExtractor={(item) => item.friendId}
           contentContainerStyle={styles.panelList}
-          ListEmptyComponent={<Text style={styles.emptyText}>Bu gün doğum günü olan yok.</Text>}
+          ListEmptyComponent={
+            <View style={styles.panelEmpty}>
+              <Text style={styles.panelEmptyEmoji}>🎈</Text>
+              <Text style={styles.emptyText}>Bu gün doğum günü olan yok.</Text>
+            </View>
+          }
           renderItem={({ item }) => (
             <Link href={{ pathname: '/friend/[id]', params: { id: item.friendId } }} asChild>
               <Pressable style={styles.friendRow}>
-                <Avatar name={item.name} photoUrl={item.photoUrl} size={36} />
+                <Avatar name={item.name} photoUrl={item.photoUrl} size={38} />
                 <Text style={styles.friendName}>{item.name}</Text>
+                <Text style={styles.friendChevron}>›</Text>
               </Pressable>
             </Link>
           )}
@@ -115,7 +132,7 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   center: {
     flex: 1,
@@ -123,32 +140,61 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   errorText: {
-    color: '#991b1b',
+    color: colors.dangerDark,
+  },
+  calendarCard: {
+    margin: spacing.lg,
+    marginBottom: 0,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.sm,
+    overflow: 'hidden',
+    ...shadowSm,
   },
   panel: {
     flex: 1,
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    padding: spacing.lg,
   },
   panelTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 8,
+    ...typography.heading,
+    marginBottom: spacing.sm,
   },
   panelList: {
-    gap: 8,
+    gap: spacing.xs,
+    flexGrow: 1,
+  },
+  panelEmpty: {
+    alignItems: 'center',
+    paddingTop: spacing.xl,
+    gap: spacing.xs,
+  },
+  panelEmptyEmoji: {
+    fontSize: 30,
+    marginBottom: spacing.xs,
   },
   emptyText: {
-    color: '#999',
+    color: colors.textMuted,
   },
   friendRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    paddingVertical: 6,
+    gap: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+  },
+  friendRowPressed: {
+    backgroundColor: colors.background,
   },
   friendName: {
+    flex: 1,
     fontSize: 15,
+    fontWeight: '600',
+    color: colors.textPrimary,
+  },
+  friendChevron: {
+    color: colors.textMuted,
+    fontSize: 20,
   },
 });

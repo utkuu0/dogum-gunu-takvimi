@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { useAuth } from '../../src/auth/AuthContext';
+import { Avatar } from '../../src/components/Avatar';
 import { getMatchThreshold, setMatchThreshold } from '../../src/faceMatch/settings';
 import { areNotificationsEnabled } from '../../src/notifications/notificationPreference';
 import { registerFcmToken, requestNotificationPermission, unregisterFcmToken } from '../../src/notifications/pushNotifications';
+import { colors, radius, shadowSm, spacing, typography } from '../../src/theme/theme';
 
 export default function SettingsScreen() {
   const { user, signOut } = useAuth();
@@ -50,30 +52,42 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {user && (
-        <View style={styles.profile}>
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.email}>{user.email}</Text>
+        <View style={styles.profileCard}>
+          <Avatar name={user.name} size={56} />
+          <View style={styles.profileText}>
+            <Text style={styles.name}>{user.name}</Text>
+            <Text style={styles.email}>{user.email}</Text>
+          </View>
         </View>
       )}
 
-      <View style={styles.row}>
-        <View style={styles.rowText}>
-          <Text style={styles.sectionTitle}>Doğum günü bildirimleri</Text>
-          <Text style={styles.sectionHint}>Yarın ve 1 hafta sonra doğum günü olan arkadaşların için hatırlatma al.</Text>
+      <Text style={styles.groupLabel}>Bildirimler</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.rowText}>
+            <Text style={styles.sectionTitle}>Doğum günü bildirimleri</Text>
+            <Text style={styles.sectionHint}>
+              Yarın ve 1 hafta sonra doğum günü olan arkadaşların için hatırlatma al.
+            </Text>
+          </View>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={handleNotificationsToggle}
+            disabled={togglingNotifications}
+            trackColor={{ true: colors.primary, false: colors.border }}
+            thumbColor={colors.white}
+          />
         </View>
-        <Switch
-          value={notificationsEnabled}
-          onValueChange={handleNotificationsToggle}
-          disabled={togglingNotifications}
-        />
       </View>
 
-      <View style={styles.section}>
+      <Text style={styles.groupLabel}>Yüz Tanıma</Text>
+      <View style={styles.card}>
         <Text style={styles.sectionTitle}>Galeride bul eşik değeri</Text>
         <Text style={styles.sectionHint}>
-          0 ile 1 arası — yükseltmek daha az ama daha kesin eşleşme, düşürmek daha çok ama daha az kesin eşleşme verir.
+          0 ile 1 arası — yükseltmek daha az ama daha kesin eşleşme, düşürmek daha çok ama daha az kesin eşleşme
+          verir.
         </Text>
         <TextInput
           style={styles.input}
@@ -83,68 +97,97 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <Pressable style={styles.signOutButton} onPress={() => signOut()}>
+      <Pressable
+        style={({ pressed }) => [styles.signOutButton, pressed && styles.signOutButtonPressed]}
+        onPress={() => signOut()}
+      >
         <Text style={styles.signOutText}>Çıkış Yap</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 24,
+    backgroundColor: colors.background,
   },
-  profile: {
-    marginBottom: 32,
+  content: {
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+    ...shadowSm,
+  },
+  profileText: {
+    flex: 1,
   },
   name: {
-    fontSize: 18,
-    fontWeight: '700',
+    ...typography.heading,
   },
   email: {
-    color: '#666',
+    ...typography.caption,
     marginTop: 2,
+  },
+  groupLabel: {
+    ...typography.small,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: spacing.xs,
+    marginLeft: spacing.xs,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.xl,
+    ...shadowSm,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 32,
-    gap: 12,
+    gap: spacing.md,
   },
   rowText: {
     flex: 1,
   },
-  section: {
-    marginBottom: 32,
-  },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    ...typography.subheading,
     marginBottom: 4,
   },
   sectionHint: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 8,
+    ...typography.caption,
+    marginBottom: spacing.sm,
+    lineHeight: 18,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
     paddingVertical: 10,
     width: 100,
+    fontSize: 15,
   },
   signOutButton: {
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.dangerLight,
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: radius.full,
     alignItems: 'center',
   },
+  signOutButtonPressed: {
+    opacity: 0.7,
+  },
   signOutText: {
-    color: '#991b1b',
+    color: colors.dangerDark,
     fontWeight: '700',
   },
 });

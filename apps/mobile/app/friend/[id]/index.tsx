@@ -21,6 +21,7 @@ import { apiClient } from '../../../src/api/client';
 import { Avatar } from '../../../src/components/Avatar';
 import { deleteFaceProfile, getFaceProfile, saveFaceProfile } from '../../../src/faceMatch/db';
 import { tryGetFaceEmbedding } from '../../../src/faceMatch/faceMatch';
+import { colors, radius, shadowSm, spacing, typography } from '../../../src/theme/theme';
 
 export default function FriendDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -116,7 +117,7 @@ export default function FriendDetailScreen() {
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -143,13 +144,14 @@ export default function FriendDetailScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Avatar name={data.name} photoUrl={data.photoUrl} size={72} />
+        <Avatar name={data.name} photoUrl={data.photoUrl} size={84} />
         <Text style={styles.name}>{data.name}</Text>
         <Text style={styles.meta}>{format(new Date(data.birthDate), 'd MMMM yyyy', { locale: tr })}</Text>
       </View>
 
       {data.notes && (
         <View style={styles.notesBox}>
+          <Text style={styles.notesLabel}>Not</Text>
           <Text style={styles.notes}>{data.notes}</Text>
         </View>
       )}
@@ -163,10 +165,14 @@ export default function FriendDetailScreen() {
       )}
 
       <View style={styles.actions}>
-        <Pressable style={styles.editButton} onPress={() => setIsEditing(true)}>
+        <Pressable style={({ pressed }) => [styles.editButton, pressed && styles.pressed]} onPress={() => setIsEditing(true)}>
           <Text style={styles.editButtonText}>Düzenle</Text>
         </Pressable>
-        <Pressable style={styles.deleteButton} onPress={confirmDelete} disabled={deleteMutation.isPending}>
+        <Pressable
+          style={({ pressed }) => [styles.deleteButton, pressed && styles.pressed]}
+          onPress={confirmDelete}
+          disabled={deleteMutation.isPending}
+        >
           <Text style={styles.deleteButtonText}>Sil</Text>
         </Pressable>
       </View>
@@ -237,48 +243,45 @@ function EditFriendForm({ friend, isSaving, onCancel, onSave }: EditFriendFormPr
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
       <Pressable style={styles.photoPicker} onPress={handlePickPhoto}>
         <Avatar name={name} photoUrl={photoUrl} size={96} />
         <Text style={styles.photoLabel}>Fotoğrafı değiştir</Text>
       </Pressable>
 
-      <Text style={styles.label}>İsim</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} />
+      <View style={styles.card}>
+        <Text style={styles.label}>İsim</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} />
 
-      <Text style={styles.label}>Doğum tarihi</Text>
-      <Pressable style={styles.input} onPress={() => setShowPicker(true)}>
-        <Text style={styles.dateText}>{format(birthDate, 'd MMMM yyyy', { locale: tr })}</Text>
-      </Pressable>
-      {showPicker && (
-        <DateTimePicker
-          value={birthDate}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          maximumDate={new Date()}
-          onChange={handleDateChange}
-        />
-      )}
-      {showPicker && Platform.OS === 'ios' && (
-        <Pressable style={styles.doneButton} onPress={() => setShowPicker(false)}>
-          <Text style={styles.doneButtonText}>Tamam</Text>
+        <Text style={styles.label}>Doğum tarihi</Text>
+        <Pressable style={styles.input} onPress={() => setShowPicker(true)}>
+          <Text style={styles.dateText}>{format(birthDate, 'd MMMM yyyy', { locale: tr })}</Text>
         </Pressable>
-      )}
+        {showPicker && (
+          <DateTimePicker
+            value={birthDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            maximumDate={new Date()}
+            onChange={handleDateChange}
+          />
+        )}
+        {showPicker && Platform.OS === 'ios' && (
+          <Pressable style={styles.doneButton} onPress={() => setShowPicker(false)}>
+            <Text style={styles.doneButtonText}>Tamam</Text>
+          </Pressable>
+        )}
 
-      <Text style={styles.label}>Not</Text>
-      <TextInput
-        style={[styles.input, styles.notesInput]}
-        value={notes}
-        onChangeText={setNotes}
-        multiline
-      />
+        <Text style={styles.label}>Not</Text>
+        <TextInput style={[styles.input, styles.notesInput]} value={notes} onChangeText={setNotes} multiline />
+      </View>
 
       <View style={styles.actions}>
-        <Pressable style={styles.editButton} onPress={onCancel} disabled={isSaving}>
+        <Pressable style={({ pressed }) => [styles.editButton, pressed && styles.pressed]} onPress={onCancel} disabled={isSaving}>
           <Text style={styles.editButtonText}>Vazgeç</Text>
         </Pressable>
-        <Pressable style={styles.saveButton} onPress={handleSave} disabled={isSaving}>
-          {isSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveButtonText}>Kaydet</Text>}
+        <Pressable style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]} onPress={handleSave} disabled={isSaving}>
+          {isSaving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveButtonText}>Kaydet</Text>}
         </Pressable>
       </View>
     </ScrollView>
@@ -286,109 +289,135 @@ function EditFriendForm({ friend, isSaving, onCancel, onSave }: EditFriendFormPr
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    backgroundColor: colors.background,
+  },
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 24,
-    gap: 8,
+    flexGrow: 1,
+    backgroundColor: colors.background,
+    padding: spacing.lg,
+    gap: spacing.sm,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: colors.background,
   },
   header: {
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 16,
+    gap: spacing.xs,
+    marginBottom: spacing.lg,
+    marginTop: spacing.sm,
   },
   name: {
+    ...typography.title,
     fontSize: 22,
-    fontWeight: '700',
   },
   meta: {
-    color: '#666',
+    ...typography.caption,
   },
   notesBox: {
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    marginBottom: spacing.lg,
+    ...shadowSm,
+  },
+  notesLabel: {
+    ...typography.small,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   notes: {
-    color: '#333',
+    color: colors.textPrimary,
+    lineHeight: 20,
   },
   scanButton: {
-    backgroundColor: '#eef2ff',
-    borderRadius: 10,
-    paddingVertical: 12,
+    backgroundColor: colors.primaryLight,
+    borderRadius: radius.full,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   scanButtonText: {
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '700',
+  },
+  pressed: {
+    opacity: 0.75,
   },
   actions: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 16,
+    gap: spacing.md,
+    marginTop: spacing.lg,
   },
   editButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: radius.full,
     alignItems: 'center',
-    backgroundColor: '#eee',
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   editButtonText: {
     fontWeight: '700',
-    color: '#333',
+    color: colors.textPrimary,
   },
   deleteButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: radius.full,
     alignItems: 'center',
-    backgroundColor: '#fee2e2',
+    backgroundColor: colors.dangerLight,
   },
   deleteButtonText: {
     fontWeight: '700',
-    color: '#991b1b',
+    color: colors.dangerDark,
   },
   saveButton: {
     flex: 1,
     paddingVertical: 14,
-    borderRadius: 10,
+    borderRadius: radius.full,
     alignItems: 'center',
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
+    ...shadowSm,
   },
   saveButtonText: {
     fontWeight: '700',
-    color: '#fff',
+    color: colors.white,
   },
   photoPicker: {
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   photoLabel: {
-    fontSize: 13,
-    color: '#444',
+    ...typography.caption,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
   },
   label: {
-    fontSize: 13,
-    color: '#444',
-    marginTop: 12,
+    ...typography.caption,
+    marginTop: spacing.md,
+    marginBottom: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 46,
+    fontSize: 15,
+    color: colors.textPrimary,
   },
   notesInput: {
     minHeight: 80,
@@ -396,17 +425,18 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 15,
+    color: colors.textPrimary,
   },
   doneButton: {
     alignSelf: 'flex-end',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   doneButtonText: {
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '700',
   },
   errorText: {
-    color: '#991b1b',
+    color: colors.dangerDark,
   },
 });

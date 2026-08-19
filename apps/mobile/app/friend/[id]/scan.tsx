@@ -38,6 +38,7 @@ import {
   type MatchItem,
   type ScanEntry,
 } from '../../../src/faceMatch/scanStore';
+import { colors, radius, shadowSm, spacing } from '../../../src/theme/theme';
 
 export default function ScanScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -130,7 +131,7 @@ export default function ScanScreen() {
             taskTitle: 'Galeri taranıyor',
             taskDesc: `0 / ${total} fotoğraf tarandı`,
             taskIcon: { name: 'ic_launcher', type: 'mipmap' },
-            color: '#2563eb',
+            color: colors.primary,
             foregroundServiceType: ['dataSync'],
             progressBar: { max: total, value: 0, indeterminate: false },
           }
@@ -231,7 +232,7 @@ export default function ScanScreen() {
   if (referenceEmbedding === 'loading') {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -264,7 +265,7 @@ export default function ScanScreen() {
         disabled={googlePhotosBusy}
       >
         {googlePhotosBusy ? (
-          <ActivityIndicator color="#2563eb" />
+          <ActivityIndicator color={colors.primary} />
         ) : (
           <Text style={styles.googlePhotosButtonText}>☁️ Google Photos’tan Seç</Text>
         )}
@@ -348,97 +349,102 @@ export default function ScanScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     alignItems: 'center',
-    padding: 24,
-    gap: 16,
+    padding: spacing.xl,
+    gap: spacing.lg,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
+    padding: spacing.xl,
+    backgroundColor: colors.background,
   },
   scanButton: {
-    backgroundColor: '#2563eb',
+    backgroundColor: colors.primary,
     paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 10,
-    minWidth: 220,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    minWidth: 240,
     alignItems: 'center',
+    ...shadowSm,
   },
   scanButtonDisabled: {
     opacity: 0.6,
   },
   cancelButton: {
-    backgroundColor: '#dc2626',
+    backgroundColor: colors.danger,
     paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 10,
-    minWidth: 220,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    minWidth: 240,
     alignItems: 'center',
+    ...shadowSm,
   },
   scanButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: '700',
     fontSize: 16,
   },
   googlePhotosButton: {
-    backgroundColor: '#eef2ff',
+    backgroundColor: colors.primaryLight,
     paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 10,
-    minWidth: 220,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    minWidth: 240,
     alignItems: 'center',
   },
   googlePhotosButtonText: {
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '700',
     fontSize: 16,
   },
   backgroundHint: {
     fontSize: 12,
-    color: '#888',
+    color: colors.textMuted,
     textAlign: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
   },
   progressBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: spacing.sm,
   },
   progressText: {
     fontSize: 13,
-    color: '#444',
+    color: colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
   },
   resultSummary: {
     fontSize: 13,
-    color: '#444',
+    color: colors.textSecondary,
     fontWeight: '600',
   },
   errorBox: {
-    backgroundColor: '#fee2e2',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: colors.dangerLight,
+    borderRadius: radius.md,
+    padding: spacing.md,
     width: '100%',
   },
   errorText: {
-    color: '#991b1b',
+    color: colors.dangerDark,
   },
   grid: {
     width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: spacing.sm,
   },
   gridItem: {
     width: '31.5%',
     aspectRatio: 1,
-    borderRadius: 8,
+    borderRadius: radius.sm,
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: colors.surface,
+    ...shadowSm,
   },
   gridImage: {
     width: '100%',
@@ -455,7 +461,7 @@ const styles = StyleSheet.create({
     bottom: 4,
     right: 4,
     backgroundColor: 'rgba(0,0,0,0.6)',
-    color: '#fff',
+    color: colors.white,
     fontSize: 11,
     fontWeight: '700',
     paddingHorizontal: 6,
@@ -464,11 +470,11 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   clearCacheButton: {
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
   },
   clearCacheText: {
     fontSize: 12,
-    color: '#888',
+    color: colors.textMuted,
     textDecorationLine: 'underline',
   },
   previewBackdrop: {

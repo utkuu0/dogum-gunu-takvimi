@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { queryClient } from '../src/api/queryClient';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
 import { NotificationBanner } from '../src/components/NotificationBanner';
+import { colors } from '../src/theme/theme';
 import {
   subscribeToForegroundMessages,
   subscribeToNotificationOpened,
@@ -50,8 +51,8 @@ function RootNavigation() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator size="large" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }

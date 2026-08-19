@@ -1,6 +1,7 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { colors } from '../theme/theme';
 
-const PALETTE = ['#2563eb', '#7c3aed', '#db2777', '#059669', '#d97706', '#dc2626'];
+const PALETTE = ['#4F46E5', '#7C3AED', '#DB2777', '#059669', '#D97706', '#0EA5E9'];
 
 function colorForName(name: string): string {
   let hash = 0;
@@ -14,19 +15,23 @@ interface AvatarProps {
   name: string;
   photoUrl?: string | null;
   size?: number;
+  ring?: boolean;
 }
 
-export function Avatar({ name, photoUrl, size = 48 }: AvatarProps) {
+export function Avatar({ name, photoUrl, size = 48, ring = false }: AvatarProps) {
   const dimensionStyle = { width: size, height: size, borderRadius: size / 2 };
+  const ringStyle = ring
+    ? { borderWidth: Math.max(2, size * 0.05), borderColor: colors.accent }
+    : null;
 
   if (photoUrl) {
-    return <Image source={{ uri: photoUrl }} style={[styles.image, dimensionStyle]} />;
+    return <Image source={{ uri: photoUrl }} style={[styles.image, dimensionStyle, ringStyle]} />;
   }
 
   const initial = name.trim().charAt(0).toUpperCase() || '?';
 
   return (
-    <View style={[styles.fallback, dimensionStyle, { backgroundColor: colorForName(name) }]}>
+    <View style={[styles.fallback, dimensionStyle, ringStyle, { backgroundColor: colorForName(name) }]}>
       <Text style={[styles.initial, { fontSize: size * 0.4 }]}>{initial}</Text>
     </View>
   );

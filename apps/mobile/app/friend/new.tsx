@@ -23,6 +23,7 @@ import { saveFaceProfile } from '../../src/faceMatch/db';
 import { tryGetFaceEmbedding } from '../../src/faceMatch/faceMatch';
 import { hasShownNotificationPrompt, markNotificationPromptShown } from '../../src/notifications/notificationPreference';
 import { registerFcmToken, requestNotificationPermission } from '../../src/notifications/pushNotifications';
+import { colors, radius, shadow, spacing, typography } from '../../src/theme/theme';
 
 export default function NewFriendScreen() {
   const [name, setName] = useState('');
@@ -155,103 +156,128 @@ export default function NewFriendScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.container}>
       <Pressable style={styles.photoPicker} onPress={handlePickPhoto}>
         {photoUrl ? (
           <Image source={{ uri: photoUrl }} style={styles.photoPreview} />
         ) : (
           <View style={styles.photoPlaceholder}>
-            <Text style={styles.photoPlaceholderText}>+</Text>
+            <Text style={styles.photoPlaceholderText}>📷</Text>
           </View>
         )}
         <Text style={styles.photoLabel}>Fotoğraf ekle</Text>
       </Pressable>
 
-      <Text style={styles.label}>İsim</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Ayşe Yılmaz" />
-
-      <Text style={styles.label}>Doğum tarihi</Text>
-      <Pressable style={styles.input} onPress={() => setShowPicker(true)}>
-        <Text style={birthDate ? styles.dateText : styles.datePlaceholder}>
-          {birthDate ? format(birthDate, 'd MMMM yyyy', { locale: tr }) : 'Tarih seç'}
-        </Text>
-      </Pressable>
-      {showPicker && (
-        <DateTimePicker
-          value={birthDate ?? new Date(2000, 0, 1)}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          maximumDate={new Date()}
-          onChange={handleDateChange}
+      <View style={styles.card}>
+        <Text style={styles.label}>İsim</Text>
+        <TextInput
+          style={styles.input}
+          value={name}
+          onChangeText={setName}
+          placeholder="Ayşe Yılmaz"
+          placeholderTextColor={colors.textMuted}
         />
-      )}
-      {showPicker && Platform.OS === 'ios' && (
-        <Pressable style={styles.doneButton} onPress={() => setShowPicker(false)}>
-          <Text style={styles.doneButtonText}>Tamam</Text>
+
+        <Text style={styles.label}>Doğum tarihi</Text>
+        <Pressable style={styles.input} onPress={() => setShowPicker(true)}>
+          <Text style={birthDate ? styles.dateText : styles.datePlaceholder}>
+            {birthDate ? format(birthDate, 'd MMMM yyyy', { locale: tr }) : 'Tarih seç'}
+          </Text>
         </Pressable>
-      )}
+        {showPicker && (
+          <DateTimePicker
+            value={birthDate ?? new Date(2000, 0, 1)}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            maximumDate={new Date()}
+            onChange={handleDateChange}
+          />
+        )}
+        {showPicker && Platform.OS === 'ios' && (
+          <Pressable style={styles.doneButton} onPress={() => setShowPicker(false)}>
+            <Text style={styles.doneButtonText}>Tamam</Text>
+          </Pressable>
+        )}
 
-      <Text style={styles.label}>Not</Text>
-      <TextInput
-        style={[styles.input, styles.notesInput]}
-        value={notes}
-        onChangeText={setNotes}
-        placeholder="Sevdiği şeyler, hediye fikirleri..."
-        multiline
-      />
+        <Text style={styles.label}>Not</Text>
+        <TextInput
+          style={[styles.input, styles.notesInput]}
+          value={notes}
+          onChangeText={setNotes}
+          placeholder="Sevdiği şeyler, hediye fikirleri..."
+          placeholderTextColor={colors.textMuted}
+          multiline
+        />
+      </View>
 
-      <Pressable style={styles.button} onPress={handleSubmit} disabled={isPending}>
-        {isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Kaydet</Text>}
+      <Pressable
+        style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+        onPress={handleSubmit}
+        disabled={isPending}
+      >
+        {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Kaydet</Text>}
       </Pressable>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    backgroundColor: colors.background,
+  },
   container: {
-    backgroundColor: '#fff',
-    padding: 24,
-    gap: 8,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
   },
   photoPicker: {
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: spacing.sm,
+    marginBottom: spacing.lg,
   },
   photoPreview: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 100,
+    height: 100,
+    borderRadius: radius.full,
   },
   photoPlaceholder: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: '#eee',
+    width: 100,
+    height: 100,
+    borderRadius: radius.full,
+    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: colors.primary,
+    borderStyle: 'dashed',
   },
   photoPlaceholderText: {
     fontSize: 32,
-    color: '#999',
   },
   photoLabel: {
-    fontSize: 13,
-    color: '#444',
+    ...typography.caption,
+  },
+  card: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.lg,
+    gap: 4,
   },
   label: {
-    fontSize: 13,
-    color: '#444',
-    marginTop: 12,
+    ...typography.caption,
+    marginTop: spacing.md,
+    marginBottom: 4,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 12,
     justifyContent: 'center',
-    minHeight: 44,
+    minHeight: 46,
+    fontSize: 15,
+    color: colors.textPrimary,
   },
   notesInput: {
     minHeight: 80,
@@ -259,29 +285,35 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 15,
+    color: colors.textPrimary,
   },
   datePlaceholder: {
     fontSize: 15,
-    color: '#999',
+    color: colors.textMuted,
   },
   doneButton: {
     alignSelf: 'flex-end',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   doneButtonText: {
-    color: '#2563eb',
+    color: colors.primary,
     fontWeight: '700',
   },
   button: {
-    marginTop: 24,
-    backgroundColor: '#2563eb',
-    paddingVertical: 14,
-    borderRadius: 10,
+    marginTop: spacing.xl,
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    borderRadius: radius.full,
     alignItems: 'center',
+    ...shadow,
+  },
+  buttonPressed: {
+    backgroundColor: colors.primaryDark,
   },
   buttonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: '700',
+    fontSize: 16,
   },
 });

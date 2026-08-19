@@ -6,6 +6,7 @@ import { tr } from 'date-fns/locale';
 import type { Birthday } from '@dogum-gunu/shared';
 import { apiClient } from '../../src/api/client';
 import { Avatar } from '../../src/components/Avatar';
+import { colors, radius, shadow, shadowSm, spacing, typography } from '../../src/theme/theme';
 
 export default function UpcomingBirthdaysScreen() {
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
@@ -19,7 +20,7 @@ export default function UpcomingBirthdaysScreen() {
   if (isLoading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -27,6 +28,7 @@ export default function UpcomingBirthdaysScreen() {
   if (isError) {
     return (
       <View style={styles.center}>
+        <Text style={styles.errorEmoji}>😕</Text>
         <Text style={styles.errorText}>Yaklaşan doğum günleri yüklenemedi.</Text>
       </View>
     );
@@ -40,12 +42,24 @@ export default function UpcomingBirthdaysScreen() {
         onRefresh={refetch}
         refreshing={isRefetching}
         contentContainerStyle={data?.length ? styles.list : styles.emptyList}
+        ListHeaderComponent={
+          data?.length ? (
+            <View style={styles.listHeader}>
+              <Text style={styles.listHeaderTitle}>Yaklaşan Doğum Günleri</Text>
+              <Text style={styles.listHeaderCount}>{data.length}</Text>
+            </View>
+          ) : null
+        }
         ListEmptyComponent={
           <View style={styles.center}>
-            <Text style={styles.emptyText}>Henüz arkadaş eklemedin.</Text>
+            <View style={styles.emptyIconCircle}>
+              <Text style={styles.emptyIconEmoji}>🎈</Text>
+            </View>
+            <Text style={styles.emptyTitle}>Henüz arkadaş eklemedin</Text>
+            <Text style={styles.emptyText}>İlk arkadaşını ekle, doğum gününü kaçırma.</Text>
             <Link href="/friend/new" asChild>
               <Pressable style={styles.emptyButton}>
-                <Text style={styles.emptyButtonText}>İlk arkadaşını ekle</Text>
+                <Text style={styles.emptyButtonText}>+ İlk arkadaşını ekle</Text>
               </Pressable>
             </Link>
           </View>
@@ -57,16 +71,18 @@ export default function UpcomingBirthdaysScreen() {
           return (
             <Link href={{ pathname: '/friend/[id]', params: { id: item.friendId } }} asChild>
               <Pressable style={[styles.card, isToday && styles.cardToday]}>
-                <Avatar name={item.name} photoUrl={item.photoUrl} />
+                <Avatar name={item.name} photoUrl={item.photoUrl} ring={isToday} />
                 <View style={styles.cardTextGroup}>
                   <Text style={styles.cardName}>{item.name}</Text>
                   <Text style={styles.cardMeta}>
                     {formattedDate} · {item.turningAge} yaşına giriyor
                   </Text>
                 </View>
-                <Text style={[styles.badge, isToday && styles.badgeToday]}>
-                  {isToday ? '🎉 Bugün!' : `${item.daysUntil} gün`}
-                </Text>
+                <View style={[styles.badge, isToday && styles.badgeToday]}>
+                  <Text style={[styles.badgeText, isToday && styles.badgeTextToday]}>
+                    {isToday ? '🎉 Bugün' : `${item.daysUntil} gün`}
+                  </Text>
+                </View>
               </Pressable>
             </Link>
           );
@@ -85,85 +101,145 @@ export default function UpcomingBirthdaysScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
   center: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 24,
-    gap: 16,
+    padding: spacing.xl,
+    gap: spacing.sm,
   },
   list: {
-    padding: 16,
-    gap: 12,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
   emptyList: {
     flexGrow: 1,
   },
+  listHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.xs,
+  },
+  listHeaderTitle: {
+    ...typography.heading,
+  },
+  listHeaderCount: {
+    ...typography.caption,
+    backgroundColor: colors.primaryLight,
+    color: colors.primary,
+    fontWeight: '800',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    borderRadius: radius.full,
+    overflow: 'hidden',
+  },
+  emptyIconCircle: {
+    width: 88,
+    height: 88,
+    borderRadius: radius.full,
+    backgroundColor: colors.primaryLight,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.sm,
+  },
+  emptyIconEmoji: {
+    fontSize: 40,
+  },
+  emptyTitle: {
+    ...typography.heading,
+  },
   emptyText: {
-    color: '#666',
+    ...typography.caption,
+    marginBottom: spacing.sm,
+    textAlign: 'center',
   },
   emptyButton: {
-    backgroundColor: '#2563eb',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 10,
+    backgroundColor: colors.primary,
+    paddingVertical: 14,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    marginTop: spacing.sm,
+    ...shadow,
+  },
+  buttonPressed: {
+    backgroundColor: colors.primaryDark,
   },
   emptyButtonText: {
-    color: '#fff',
+    color: colors.white,
     fontWeight: '700',
   },
+  errorEmoji: {
+    fontSize: 36,
+  },
   errorText: {
-    color: '#991b1b',
+    color: colors.dangerDark,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 12,
-    padding: 12,
+    gap: spacing.md,
+    backgroundColor: colors.surface,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    ...shadowSm,
+  },
+  cardPressed: {
+    opacity: 0.85,
   },
   cardToday: {
-    backgroundColor: '#fef3c7',
-    borderWidth: 1,
-    borderColor: '#fbbf24',
+    backgroundColor: colors.accentLight,
+    borderWidth: 1.5,
+    borderColor: colors.accent,
   },
   cardTextGroup: {
     flex: 1,
   },
   cardName: {
-    fontSize: 16,
-    fontWeight: '700',
+    ...typography.subheading,
   },
   cardMeta: {
     marginTop: 2,
-    color: '#666',
-    fontSize: 13,
+    ...typography.caption,
   },
   badge: {
-    fontSize: 13,
-    color: '#444',
-    fontWeight: '600',
+    backgroundColor: colors.background,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.sm + 2,
+    paddingVertical: 6,
   },
   badgeToday: {
-    color: '#92400e',
+    backgroundColor: colors.accent,
+  },
+  badgeText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    fontWeight: '700',
+  },
+  badgeTextToday: {
+    color: colors.white,
   },
   fab: {
     position: 'absolute',
     right: 20,
     bottom: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#2563eb',
+    width: 58,
+    height: 58,
+    borderRadius: radius.full,
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...shadow,
+  },
+  fabPressed: {
+    backgroundColor: colors.primaryDark,
   },
   fabText: {
-    color: '#fff',
-    fontSize: 28,
-    lineHeight: 30,
+    color: colors.white,
+    fontSize: 30,
+    lineHeight: 32,
   },
 });
