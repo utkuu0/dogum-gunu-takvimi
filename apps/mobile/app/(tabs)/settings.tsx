@@ -5,6 +5,7 @@ import { Avatar } from '../../src/components/Avatar';
 import { getMatchThreshold, setMatchThreshold } from '../../src/faceMatch/settings';
 import { areNotificationsEnabled } from '../../src/notifications/notificationPreference';
 import { registerFcmToken, requestNotificationPermission, unregisterFcmToken } from '../../src/notifications/pushNotifications';
+import { GradientView } from '../../src/theme/GradientView';
 import { colors, radius, shadowSm, spacing, typography } from '../../src/theme/theme';
 
 export default function SettingsScreen() {
@@ -55,9 +56,9 @@ export default function SettingsScreen() {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       {user && (
         <View style={styles.profileCard}>
-          <View style={styles.profileRingWrap}>
+          <GradientView colors={[colors.accent, colors.primary]} style={styles.profileRingWrap}>
             <Avatar name={user.name} size={60} />
-          </View>
+          </GradientView>
           <View style={styles.profileText}>
             <Text style={styles.name}>{user.name}</Text>
             <Text style={styles.email}>{user.email}</Text>
@@ -126,10 +127,8 @@ const styles = StyleSheet.create({
     ...shadowSm,
   },
   profileRingWrap: {
-    padding: 3,
+    padding: 4,
     borderRadius: radius.full,
-    borderWidth: 2,
-    borderColor: colors.accent,
   },
   profileText: {
     flex: 1,

@@ -8,6 +8,7 @@ import { tr } from 'date-fns/locale';
 import type { Birthday } from '@dogum-gunu/shared';
 import { apiClient } from '../../src/api/client';
 import { Avatar } from '../../src/components/Avatar';
+import { GradientView } from '../../src/theme/GradientView';
 import { colors, radius, shadowSm, spacing, typography } from '../../src/theme/theme';
 import '../../src/utils/calendarLocale';
 
@@ -78,7 +79,7 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.calendarCard}>
+      <GradientView colors={[colors.primaryLight, colors.surface]} direction="vertical" style={styles.calendarCard}>
         <Calendar
           current={selectedDate}
           onMonthChange={(month: DateData) => setVisibleMonth({ year: month.year, month: month.month })}
@@ -88,6 +89,7 @@ export default function CalendarScreen() {
             [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: colors.secondary },
           }}
           theme={{
+            calendarBackground: 'transparent',
             todayTextColor: colors.primary,
             arrowColor: colors.secondary,
             textMonthFontWeight: '900',
@@ -99,7 +101,7 @@ export default function CalendarScreen() {
             textSectionTitleColor: colors.textMuted,
           }}
         />
-      </View>
+      </GradientView>
 
       <View style={styles.panel}>
         <Text style={styles.panelTitle}>{format(new Date(selectedDate), 'd MMMM', { locale: tr })}</Text>
@@ -145,7 +147,6 @@ const styles = StyleSheet.create({
   calendarCard: {
     margin: spacing.lg,
     marginBottom: 0,
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     paddingVertical: spacing.sm,
     overflow: 'hidden',

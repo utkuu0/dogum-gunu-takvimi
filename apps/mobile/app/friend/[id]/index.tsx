@@ -21,6 +21,7 @@ import { apiClient } from '../../../src/api/client';
 import { Avatar } from '../../../src/components/Avatar';
 import { deleteFaceProfile, getFaceProfile, saveFaceProfile } from '../../../src/faceMatch/db';
 import { tryGetFaceEmbedding } from '../../../src/faceMatch/faceMatch';
+import { GradientView } from '../../../src/theme/GradientView';
 import { colors, radius, shadowSm, spacing, typography } from '../../../src/theme/theme';
 
 export default function FriendDetailScreen() {
@@ -144,9 +145,9 @@ export default function FriendDetailScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.avatarRing}>
+        <GradientView colors={[colors.accent, colors.primary, colors.secondary]} style={styles.avatarRing}>
           <Avatar name={data.name} photoUrl={data.photoUrl} size={84} />
-        </View>
+        </GradientView>
         <Text style={styles.name}>{data.name}</Text>
         <Text style={styles.meta}>{format(new Date(data.birthDate), 'd MMMM yyyy', { locale: tr })}</Text>
       </View>
@@ -278,8 +279,10 @@ function EditFriendForm({ friend, isSaving, onCancel, onSave }: EditFriendFormPr
         <Pressable style={styles.editButton} onPress={onCancel} disabled={isSaving}>
           <Text style={styles.editButtonText}>Vazgeç</Text>
         </Pressable>
-        <Pressable style={styles.saveButton} onPress={handleSave} disabled={isSaving}>
-          {isSaving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveButtonText}>Kaydet</Text>}
+        <Pressable style={styles.saveButtonShadowWrap} onPress={handleSave} disabled={isSaving}>
+          <GradientView colors={[colors.primary, colors.secondary]} style={styles.saveButton}>
+            {isSaving ? <ActivityIndicator color={colors.white} /> : <Text style={styles.saveButtonText}>Kaydet</Text>}
+          </GradientView>
         </Pressable>
       </View>
     </ScrollView>
@@ -311,8 +314,6 @@ const styles = StyleSheet.create({
   avatarRing: {
     padding: 4,
     borderRadius: radius.full,
-    borderWidth: 3,
-    borderColor: colors.accent,
     marginBottom: spacing.xs,
   },
   name: {
@@ -379,13 +380,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: colors.dangerDark,
   },
-  saveButton: {
+  saveButtonShadowWrap: {
     flex: 1,
+    borderRadius: radius.full,
+    ...shadowSm,
+  },
+  saveButton: {
     paddingVertical: 15,
     borderRadius: radius.full,
     alignItems: 'center',
-    backgroundColor: colors.primary,
-    ...shadowSm,
   },
   saveButtonText: {
     fontWeight: '800',

@@ -23,6 +23,7 @@ import { saveFaceProfile } from '../../src/faceMatch/db';
 import { tryGetFaceEmbedding } from '../../src/faceMatch/faceMatch';
 import { hasShownNotificationPrompt, markNotificationPromptShown } from '../../src/notifications/notificationPreference';
 import { registerFcmToken, requestNotificationPermission } from '../../src/notifications/pushNotifications';
+import { GradientView } from '../../src/theme/GradientView';
 import { colors, radius, shadow, spacing, typography } from '../../src/theme/theme';
 
 export default function NewFriendScreen() {
@@ -210,8 +211,10 @@ export default function NewFriendScreen() {
         />
       </View>
 
-      <Pressable style={styles.button} onPress={handleSubmit} disabled={isPending}>
-        {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Kaydet</Text>}
+      <Pressable style={styles.buttonShadowWrap} onPress={handleSubmit} disabled={isPending}>
+        <GradientView colors={[colors.primary, colors.secondary]} style={styles.button}>
+          {isPending ? <ActivityIndicator color={colors.white} /> : <Text style={styles.buttonText}>Kaydet</Text>}
+        </GradientView>
       </Pressable>
     </ScrollView>
   );
@@ -298,13 +301,15 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontWeight: '800',
   },
-  button: {
+  buttonShadowWrap: {
     marginTop: spacing.xl,
-    backgroundColor: colors.primary,
+    borderRadius: radius.full,
+    ...shadow,
+  },
+  button: {
     paddingVertical: 17,
     borderRadius: radius.full,
     alignItems: 'center',
-    ...shadow,
   },
   buttonText: {
     color: colors.white,

@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
+import { GradientView } from '../../src/theme/GradientView';
 import { colors, radius, shadow } from '../../src/theme/theme';
 
 function TabIcon({ emoji, focused }: { emoji: string; focused: boolean }) {
@@ -15,7 +16,12 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerTitleAlign: 'center',
-        headerStyle: styles.header,
+        headerBackground: () => (
+          <GradientView
+            colors={[colors.secondaryLight, colors.primaryLight, colors.accentLight]}
+            style={styles.headerGradient}
+          />
+        ),
         headerShadowVisible: false,
         headerTitleStyle: { fontWeight: '900', color: colors.textPrimary, fontSize: 19 },
         tabBarShowLabel: false,
@@ -42,8 +48,8 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: colors.secondaryLight,
+  headerGradient: {
+    flex: 1,
     borderBottomLeftRadius: radius.xl,
     borderBottomRightRadius: radius.xl,
   },

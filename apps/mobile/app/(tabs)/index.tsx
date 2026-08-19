@@ -6,6 +6,7 @@ import { tr } from 'date-fns/locale';
 import type { Birthday } from '@dogum-gunu/shared';
 import { apiClient } from '../../src/api/client';
 import { Avatar } from '../../src/components/Avatar';
+import { GradientView } from '../../src/theme/GradientView';
 import { colors, radius, shadow, shadowSm, spacing, typography } from '../../src/theme/theme';
 
 export default function UpcomingBirthdaysScreen() {
@@ -46,22 +47,24 @@ export default function UpcomingBirthdaysScreen() {
           data?.length ? (
             <View style={styles.listHeader}>
               <Text style={styles.listHeaderTitle}>Yaklaşanlar</Text>
-              <View style={styles.countPill}>
+              <GradientView colors={[colors.secondary, colors.primary]} style={styles.countPill}>
                 <Text style={styles.countPillText}>{data.length}</Text>
-              </View>
+              </GradientView>
             </View>
           ) : null
         }
         ListEmptyComponent={
           <View style={styles.center}>
-            <View style={styles.emptyIconCircle}>
+            <GradientView colors={[colors.primaryLight, colors.secondaryLight]} style={styles.emptyIconCircle}>
               <Text style={styles.emptyIconEmoji}>🎈</Text>
-            </View>
+            </GradientView>
             <Text style={styles.emptyTitle}>Henüz arkadaş eklemedin</Text>
             <Text style={styles.emptyText}>İlk arkadaşını ekle, doğum gününü kaçırma.</Text>
             <Link href="/friend/new" asChild>
-              <Pressable style={styles.emptyButton}>
-                <Text style={styles.emptyButtonText}>+ İlk arkadaşını ekle</Text>
+              <Pressable style={styles.emptyButtonShadowWrap}>
+                <GradientView colors={[colors.primary, colors.secondary]} style={styles.emptyButton}>
+                  <Text style={styles.emptyButtonText}>+ İlk arkadaşını ekle</Text>
+                </GradientView>
               </Pressable>
             </Link>
           </View>
@@ -94,8 +97,10 @@ export default function UpcomingBirthdaysScreen() {
       />
 
       <Link href="/friend/new" asChild>
-        <Pressable style={styles.fab}>
-          <Text style={styles.fabText}>+</Text>
+        <Pressable style={styles.fabShadowWrap}>
+          <GradientView colors={[colors.primary, colors.accent]} style={styles.fab}>
+            <Text style={styles.fabText}>+</Text>
+          </GradientView>
         </Pressable>
       </Link>
     </View>
@@ -136,7 +141,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
   countPill: {
-    backgroundColor: colors.secondary,
     minWidth: 28,
     height: 28,
     borderRadius: radius.full,
@@ -153,7 +157,6 @@ const styles = StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: radius.full,
-    backgroundColor: colors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
@@ -169,13 +172,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
     textAlign: 'center',
   },
-  emptyButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 15,
-    paddingHorizontal: spacing.xl,
+  emptyButtonShadowWrap: {
     borderRadius: radius.full,
     marginTop: spacing.sm,
     ...shadow,
+  },
+  emptyButton: {
+    paddingVertical: 15,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.full,
+    alignItems: 'center',
   },
   emptyButtonText: {
     color: colors.white,
@@ -235,19 +241,23 @@ const styles = StyleSheet.create({
   badgeTextToday: {
     color: colors.white,
   },
-  fab: {
+  fabShadowWrap: {
     position: 'absolute',
     right: 24,
     bottom: 104,
     width: 60,
     height: 60,
     borderRadius: radius.full,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
     borderWidth: 3,
     borderColor: colors.surface,
+    backgroundColor: colors.surface,
     ...shadow,
+  },
+  fab: {
+    flex: 1,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   fabText: {
     color: colors.white,

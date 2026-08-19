@@ -3,6 +3,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/auth/AuthContext';
 import { GoogleSignInCancelledError } from '../../src/auth/googleSignIn';
+import { GradientView } from '../../src/theme/GradientView';
 import { colors, radius, shadow, spacing, typography } from '../../src/theme/theme';
 
 const CONFETTI: { emoji: string; top: string; left?: string; right?: string; size: number; rotate: string }[] = [
@@ -33,9 +34,9 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.blobPink} />
-      <View style={styles.blobPurple} />
-      <View style={styles.blobYellow} />
+      <GradientView colors={[colors.primaryLight, colors.accentLight]} direction="vertical" style={styles.blobPink} />
+      <GradientView colors={[colors.secondaryLight, colors.primaryLight]} direction="vertical" style={styles.blobPurple} />
+      <GradientView colors={[colors.yellowLight, colors.accentLight]} direction="vertical" style={styles.blobYellow} />
 
       {CONFETTI.map((item, index) => (
         <Text
@@ -56,26 +57,28 @@ export default function LoginScreen() {
       ))}
 
       <View style={styles.content}>
-        <View style={styles.logoRing}>
+        <GradientView colors={[colors.accent, colors.primary, colors.secondary]} style={styles.logoRing}>
           <View style={styles.logoCircle}>
             <Text style={styles.logoEmoji}>🎂</Text>
           </View>
-        </View>
+        </GradientView>
 
         <Text style={styles.title}>Doğum Günü{'\n'}Takvimi</Text>
         <Text style={styles.subtitle}>Arkadaşlarının doğum günlerini{'\n'}asla kaçırma.</Text>
 
-        <Pressable style={styles.button} onPress={handleSignIn} disabled={signingIn}>
-          {signingIn ? (
-            <ActivityIndicator color={colors.white} />
-          ) : (
-            <>
-              <View style={styles.googleBadge}>
-                <Text style={styles.googleBadgeText}>G</Text>
-              </View>
-              <Text style={styles.buttonText}>Google ile Giriş Yap</Text>
-            </>
-          )}
+        <Pressable style={styles.buttonShadowWrap} onPress={handleSignIn} disabled={signingIn}>
+          <GradientView colors={[colors.primary, colors.secondary]} style={styles.button}>
+            {signingIn ? (
+              <ActivityIndicator color={colors.white} />
+            ) : (
+              <>
+                <View style={styles.googleBadge}>
+                  <Text style={styles.googleBadgeText}>G</Text>
+                </View>
+                <Text style={styles.buttonText}>Google ile Giriş Yap</Text>
+              </>
+            )}
+          </GradientView>
         </Pressable>
 
         <Text style={styles.footnote}>Giriş yaparak partiyi kaçırmayacaksın.</Text>
@@ -130,8 +133,6 @@ const styles = StyleSheet.create({
     width: 116,
     height: 116,
     borderRadius: radius.full,
-    borderWidth: 4,
-    borderColor: colors.accent,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xl,
@@ -162,9 +163,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 21,
   },
+  buttonShadowWrap: {
+    borderRadius: radius.full,
+    ...shadow,
+  },
   button: {
     flexDirection: 'row',
-    backgroundColor: colors.primary,
     paddingVertical: 17,
     paddingHorizontal: spacing.xl,
     borderRadius: radius.full,
@@ -172,7 +176,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.sm,
-    ...shadow,
   },
   googleBadge: {
     width: 24,
