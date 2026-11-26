@@ -11,9 +11,9 @@ import { colors, radius, shadow, shadowSm, spacing, typography } from '../../src
 
 export default function UpcomingBirthdaysScreen() {
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
-    queryKey: ['friends', 'upcoming'],
+    queryKey: ['friends'],
     queryFn: async () => {
-      const { data } = await apiClient.get<Birthday[]>('/friends/upcoming');
+      const { data } = await apiClient.get<Birthday[]>('/friends');
       return data;
     },
   });
@@ -30,7 +30,7 @@ export default function UpcomingBirthdaysScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorEmoji}>😕</Text>
-        <Text style={styles.errorText}>Yaklaşan doğum günleri yüklenemedi.</Text>
+        <Text style={styles.errorText}>Doğum günleri yüklenemedi.</Text>
       </View>
     );
   }
@@ -46,7 +46,7 @@ export default function UpcomingBirthdaysScreen() {
         ListHeaderComponent={
           data?.length ? (
             <View style={styles.listHeader}>
-              <Text style={styles.listHeaderTitle}>Yaklaşanlar</Text>
+              <Text style={styles.listHeaderTitle}>Doğum günleri</Text>
               <GradientView colors={[colors.secondary, colors.primary]} style={styles.countPill}>
                 <Text style={styles.countPillText}>{data.length}</Text>
               </GradientView>
