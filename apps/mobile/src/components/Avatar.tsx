@@ -1,5 +1,5 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { colors } from '../theme/theme';
+import { useTheme } from '../theme/ThemeContext';
 
 const PALETTE = ['#EC4899', '#8B5CF6', '#F97316', '#10B981', '#FBBF24', '#3B82F6'];
 
@@ -19,6 +19,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ name, photoUrl, size = 48, ring = false }: AvatarProps) {
+  const { colors } = useTheme();
   const dimensionStyle = { width: size, height: size, borderRadius: size / 2 };
   const ringStyle = ring
     ? { borderWidth: Math.max(2, size * 0.05), borderColor: colors.accent }
@@ -31,7 +32,9 @@ export function Avatar({ name, photoUrl, size = 48, ring = false }: AvatarProps)
   const initial = name.trim().charAt(0).toUpperCase() || '?';
 
   return (
-    <View style={[styles.fallback, dimensionStyle, ringStyle, { backgroundColor: colorForName(name) }]}>
+    <View
+      style={[styles.fallback, dimensionStyle, ringStyle, { backgroundColor: colorForName(name) }]}
+    >
       <Text style={[styles.initial, { fontSize: size * 0.4 }]}>{initial}</Text>
     </View>
   );
@@ -39,7 +42,7 @@ export function Avatar({ name, photoUrl, size = 48, ring = false }: AvatarProps)
 
 const styles = StyleSheet.create({
   image: {
-    backgroundColor: '#eee',
+    backgroundColor: '#C9BEDC',
   },
   fallback: {
     alignItems: 'center',

@@ -7,7 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { queryClient } from '../src/api/queryClient';
 import { AuthProvider, useAuth } from '../src/auth/AuthContext';
 import { NotificationBanner } from '../src/components/NotificationBanner';
-import { colors } from '../src/theme/theme';
+import { ThemeProvider, useTheme } from '../src/theme/ThemeContext';
 import {
   subscribeToForegroundMessages,
   subscribeToNotificationOpened,
@@ -16,6 +16,7 @@ import {
 } from '../src/notifications/pushNotifications';
 
 function RootNavigation() {
+  const { colors, isDark } = useTheme();
   const { isLoading, isAuthenticated } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -51,7 +52,14 @@ function RootNavigation() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.background }}>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: colors.background,
+        }}
+      >
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
@@ -59,7 +67,17 @@ function RootNavigation() {
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          headerStyle: { backgroundColor: colors.surface },
+          headerTintColor: colors.textPrimary,
+          headerTitleStyle: { fontWeight: '800', color: colors.textPrimary },
+          headerShadowVisible: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      >
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen
@@ -96,12 +114,13 @@ function RootNavigation() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <StatusBar style="auto" />
-          <RootNavigation />
-        </AuthProvider>
-      </QueryClientProvider>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <RootNavigation />
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

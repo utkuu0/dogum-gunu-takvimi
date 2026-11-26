@@ -1,14 +1,31 @@
-import { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { useEffect, useState, useMemo } from 'react';
+import {
+  Alert,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { useAuth } from '../../src/auth/AuthContext';
 import { Avatar } from '../../src/components/Avatar';
 import { getMatchThreshold, setMatchThreshold } from '../../src/faceMatch/settings';
 import { areNotificationsEnabled } from '../../src/notifications/notificationPreference';
-import { registerFcmToken, requestNotificationPermission, unregisterFcmToken } from '../../src/notifications/pushNotifications';
+import {
+  registerFcmToken,
+  requestNotificationPermission,
+  unregisterFcmToken,
+} from '../../src/notifications/pushNotifications';
 import { GradientView } from '../../src/theme/GradientView';
-import { colors, radius, shadowSm, spacing, typography } from '../../src/theme/theme';
+import { radius, spacing, type Theme } from '../../src/theme/theme';
+import { useTheme } from '../../src/theme/ThemeContext';
 
 export default function SettingsScreen() {
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { user, signOut } = useAuth();
   const [threshold, setThreshold] = useState('');
   const [notificationsEnabled, setNotificationsEnabledState] = useState(false);
@@ -66,6 +83,22 @@ export default function SettingsScreen() {
         </View>
       )}
 
+      <Text style={styles.groupLabel}>Görünüm</Text>
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.rowText}>
+            <Text style={styles.sectionTitle}>Koyu mod</Text>
+            <Text style={styles.sectionHint}>Uygulamayı koyu renklerle göster.</Text>
+          </View>
+          <Switch
+            value={theme.isDark}
+            onValueChange={(value) => theme.setMode(value ? 'dark' : 'light')}
+            trackColor={{ true: colors.primary, false: colors.border }}
+            thumbColor={colors.white}
+          />
+        </View>
+      </View>
+
       <Text style={styles.groupLabel}>Bildirimler</Text>
       <View style={styles.card}>
         <View style={styles.row}>
@@ -89,8 +122,8 @@ export default function SettingsScreen() {
       <View style={styles.card}>
         <Text style={styles.sectionTitle}>Galeride bul eşik değeri</Text>
         <Text style={styles.sectionHint}>
-          0 ile 1 arası — yükseltmek daha az ama daha kesin eşleşme, düşürmek daha çok ama daha az kesin eşleşme
-          verir.
+          0 ile 1 arası — yükseltmek daha az ama daha kesin eşleşme, düşürmek daha çok ama daha az
+          kesin eşleşme verir.
         </Text>
         <TextInput
           style={styles.input}
@@ -107,90 +140,91 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.lg,
-    paddingBottom: 130,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-    ...shadowSm,
-  },
-  profileRingWrap: {
-    padding: 4,
-    borderRadius: radius.full,
-  },
-  profileText: {
-    flex: 1,
-  },
-  name: {
-    ...typography.heading,
-  },
-  email: {
-    ...typography.caption,
-    marginTop: 2,
-  },
-  groupLabel: {
-    ...typography.small,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: spacing.xs,
-    marginLeft: spacing.xs,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    marginBottom: spacing.xl,
-    ...shadowSm,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  rowText: {
-    flex: 1,
-  },
-  sectionTitle: {
-    ...typography.subheading,
-    marginBottom: 4,
-  },
-  sectionHint: {
-    ...typography.caption,
-    marginBottom: spacing.sm,
-    lineHeight: 18,
-  },
-  input: {
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.background,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    width: 100,
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  signOutButton: {
-    backgroundColor: colors.dangerLight,
-    paddingVertical: 15,
-    borderRadius: radius.full,
-    alignItems: 'center',
-  },
-  signOutText: {
-    color: colors.dangerDark,
-    fontWeight: '800',
-  },
-});
+const createStyles = ({ colors, typography, shadowSm }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    content: {
+      padding: spacing.lg,
+      paddingBottom: 130,
+    },
+    profileCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      marginBottom: spacing.xl,
+      ...shadowSm,
+    },
+    profileRingWrap: {
+      padding: 4,
+      borderRadius: radius.full,
+    },
+    profileText: {
+      flex: 1,
+    },
+    name: {
+      ...typography.heading,
+    },
+    email: {
+      ...typography.caption,
+      marginTop: 2,
+    },
+    groupLabel: {
+      ...typography.small,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: spacing.xs,
+      marginLeft: spacing.xs,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      marginBottom: spacing.xl,
+      ...shadowSm,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    rowText: {
+      flex: 1,
+    },
+    sectionTitle: {
+      ...typography.subheading,
+      marginBottom: 4,
+    },
+    sectionHint: {
+      ...typography.caption,
+      marginBottom: spacing.sm,
+      lineHeight: 18,
+    },
+    input: {
+      borderWidth: 2,
+      borderColor: colors.border,
+      backgroundColor: colors.background,
+      borderRadius: radius.sm,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 10,
+      width: 100,
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    signOutButton: {
+      backgroundColor: colors.dangerLight,
+      paddingVertical: 15,
+      borderRadius: radius.full,
+      alignItems: 'center',
+    },
+    signOutText: {
+      color: colors.dangerDark,
+      fontWeight: '800',
+    },
+  });

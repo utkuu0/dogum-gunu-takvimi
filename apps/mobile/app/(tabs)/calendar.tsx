@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import { Calendar, type DateData } from 'react-native-calendars';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
@@ -9,7 +9,8 @@ import type { Birthday } from '@dogum-gunu/shared';
 import { apiClient } from '../../src/api/client';
 import { Avatar } from '../../src/components/Avatar';
 import { GradientView } from '../../src/theme/GradientView';
-import { colors, radius, shadowSm, spacing, typography } from '../../src/theme/theme';
+import { radius, spacing, type Theme } from '../../src/theme/theme';
+import { useTheme } from '../../src/theme/ThemeContext';
 import '../../src/utils/calendarLocale';
 
 function pad(value: number): string {
@@ -21,8 +22,14 @@ function toDateKey(year: number, month: number, day: number): string {
 }
 
 export default function CalendarScreen() {
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const today = new Date();
-  const [visibleMonth, setVisibleMonth] = useState({ year: today.getFullYear(), month: today.getMonth() + 1 });
+  const [visibleMonth, setVisibleMonth] = useState({
+    year: today.getFullYear(),
+    month: today.getMonth() + 1,
+  });
   const [selectedDate, setSelectedDate] = useState(
     toDateKey(today.getFullYear(), today.getMonth() + 1, today.getDate())
   );
@@ -47,7 +54,7 @@ export default function CalendarScreen() {
       marks[key] = { marked: true, dotColor: colors.accent };
     }
     return marks;
-  }, [data, visibleMonth]);
+  }, [data, visibleMonth, colors.accent]);
 
   const selectedDayFriends = useMemo(() => {
     if (!data) return [];
@@ -79,17 +86,31 @@ export default function CalendarScreen() {
 
   return (
     <View style={styles.container}>
-      <GradientView colors={[colors.primaryLight, colors.surface]} direction="vertical" style={styles.calendarCard}>
+      <GradientView
+        colors={[colors.primaryLight, colors.surface]}
+        direction="vertical"
+        style={styles.calendarCard}
+      >
         <Calendar
+          key={theme.isDark ? 'dark' : 'light'}
           current={selectedDate}
-          onMonthChange={(month: DateData) => setVisibleMonth({ year: month.year, month: month.month })}
+          onMonthChange={(month: DateData) =>
+            setVisibleMonth({ year: month.year, month: month.month })
+          }
           onDayPress={(day: DateData) => setSelectedDate(day.dateString)}
           markedDates={{
             ...markedDates,
-            [selectedDate]: { ...(markedDates[selectedDate] ?? {}), selected: true, selectedColor: colors.secondary },
+            [selectedDate]: {
+              ...(markedDates[selectedDate] ?? {}),
+              selected: true,
+              selectedColor: colors.secondary,
+            },
           }}
           theme={{
             calendarBackground: 'transparent',
+            dayTextColor: colors.textPrimary,
+            textDisabledColor: colors.textMuted,
+            selectedDayTextColor: colors.white,
             todayTextColor: colors.primary,
             arrowColor: colors.secondary,
             textMonthFontWeight: '900',
@@ -104,7 +125,9 @@ export default function CalendarScreen() {
       </GradientView>
 
       <View style={styles.panel}>
-        <Text style={styles.panelTitle}>{format(new Date(selectedDate), 'd MMMM', { locale: tr })}</Text>
+        <Text style={styles.panelTitle}>
+          {format(new Date(selectedDate), 'd MMMM', { locale: tr })}
+        </Text>
 
         <FlatList
           data={selectedDayFriends}
@@ -117,13 +140,16 @@ export default function CalendarScreen() {
             </View>
           }
           renderItem={({ item }) => (
-            <Link href={{ pathname: '/friend/[id]', params: { id: item.friendId } }} asChild>
-              <Pressable style={styles.friendRow}>
-                <Avatar name={item.name} photoUrl={item.photoUrl} size={38} />
-                <Text style={styles.friendName}>{item.name}</Text>
-                <Text style={styles.friendChevron}>›</Text>
-              </Pressable>
-            </Link>
+            <Pressable
+              style={styles.friendRow}
+              onPress={() =>
+                router.push({ pathname: '/friend/[id]', params: { id: item.friendId } })
+              }
+            >
+              <Avatar name={item.name} photoUrl={item.photoUrl} size={38} />
+              <Text style={styles.friendName}>{item.name}</Text>
+              <Text style={styles.friendChevron}>›</Text>
+            </Pressable>
           )}
         />
       </View>
@@ -131,69 +157,70 @@ export default function CalendarScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorText: {
-    color: colors.dangerDark,
-  },
-  calendarCard: {
-    margin: spacing.lg,
-    marginBottom: 0,
-    borderRadius: radius.lg,
-    paddingVertical: spacing.sm,
-    overflow: 'hidden',
-    ...shadowSm,
-  },
-  panel: {
-    flex: 1,
-    padding: spacing.lg,
-    paddingBottom: 110,
-  },
-  panelTitle: {
-    ...typography.heading,
-    marginBottom: spacing.sm,
-  },
-  panelList: {
-    gap: spacing.xs,
-    flexGrow: 1,
-  },
-  panelEmpty: {
-    alignItems: 'center',
-    paddingTop: spacing.xl,
-    gap: spacing.xs,
-  },
-  panelEmptyEmoji: {
-    fontSize: 30,
-    marginBottom: spacing.xs,
-  },
-  emptyText: {
-    color: colors.textMuted,
-  },
-  friendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.sm,
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-  },
-  friendName: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  friendChevron: {
-    color: colors.textMuted,
-    fontSize: 20,
-  },
-});
+const createStyles = ({ colors, typography, shadowSm }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    errorText: {
+      color: colors.dangerDark,
+    },
+    calendarCard: {
+      margin: spacing.lg,
+      marginBottom: 0,
+      borderRadius: radius.lg,
+      paddingVertical: spacing.sm,
+      overflow: 'hidden',
+      ...shadowSm,
+    },
+    panel: {
+      flex: 1,
+      padding: spacing.lg,
+      paddingBottom: 110,
+    },
+    panelTitle: {
+      ...typography.heading,
+      marginBottom: spacing.sm,
+    },
+    panelList: {
+      gap: spacing.xs,
+      flexGrow: 1,
+    },
+    panelEmpty: {
+      alignItems: 'center',
+      paddingTop: spacing.xl,
+      gap: spacing.xs,
+    },
+    panelEmptyEmoji: {
+      fontSize: 30,
+      marginBottom: spacing.xs,
+    },
+    emptyText: {
+      color: colors.textMuted,
+    },
+    friendRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.sm,
+      paddingHorizontal: spacing.sm,
+      backgroundColor: colors.surface,
+      borderRadius: radius.md,
+    },
+    friendName: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    friendChevron: {
+      color: colors.textMuted,
+      fontSize: 20,
+    },
+  });

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -16,7 +16,11 @@ import * as WebBrowser from 'expo-web-browser';
 import BackgroundService from 'react-native-background-actions';
 import { useLocalSearchParams } from 'expo-router';
 import { clearScanCache, getFaceProfile } from '../../../src/faceMatch/db';
-import { GooglePhotosAuthCancelledError, connectGooglePhotos, isGooglePhotosConnected } from '../../../src/faceMatch/googlePhotosAuth';
+import {
+  GooglePhotosAuthCancelledError,
+  connectGooglePhotos,
+  isGooglePhotosConnected,
+} from '../../../src/faceMatch/googlePhotosAuth';
 import {
   createPickerSession,
   getDownloadToken,
@@ -38,12 +42,18 @@ import {
   type MatchItem,
   type ScanEntry,
 } from '../../../src/faceMatch/scanStore';
-import { colors, radius, shadowSm, spacing } from '../../../src/theme/theme';
+import { radius, spacing, type Theme } from '../../../src/theme/theme';
+import { useTheme } from '../../../src/theme/ThemeContext';
 
 export default function ScanScreen() {
+  const theme = useTheme();
+  const { colors } = theme;
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<ScanEntry>(() => getScanEntry(id));
-  const [referenceEmbedding, setReferenceEmbedding] = useState<number[] | null | 'loading'>('loading');
+  const [referenceEmbedding, setReferenceEmbedding] = useState<number[] | null | 'loading'>(
+    'loading'
+  );
   const [previewUri, setPreviewUri] = useState<string | null>(null);
 
   useEffect(() => {
@@ -63,7 +73,10 @@ export default function ScanScreen() {
       return;
     }
 
-    updateScanEntry(id, { error: null, matches: getScanEntry(id).matches.filter((m) => m.source !== 'device') });
+    updateScanEntry(id, {
+      error: null,
+      matches: getScanEntry(id).matches.filter((m) => m.source !== 'device'),
+    });
     setCancelRequested(id, false);
 
     let metadata;
@@ -87,7 +100,9 @@ export default function ScanScreen() {
 
     const mergeMatches = (deviceMatches: MatchItem[]) => {
       const others = getScanEntry(id).matches.filter((m) => m.source !== 'device');
-      updateScanEntry(id, { matches: [...others, ...deviceMatches].sort((a, b) => b.similarity - a.similarity) });
+      updateScanEntry(id, {
+        matches: [...others, ...deviceMatches].sort((a, b) => b.similarity - a.similarity),
+      });
     };
 
     if (Platform.OS === 'android') {
@@ -113,11 +128,19 @@ export default function ScanScreen() {
               });
 
               updateScanEntry(id, {
-                scanState: { phase: 'done', processed: result.processed, total, cancelled: result.cancelled },
+                scanState: {
+                  phase: 'done',
+                  processed: result.processed,
+                  total,
+                  cancelled: result.cancelled,
+                },
               });
             } catch (err) {
               updateScanEntry(id, {
-                error: err instanceof Error ? err.message : 'Tarama sırasında beklenmeyen bir hata oluştu.',
+                error:
+                  err instanceof Error
+                    ? err.message
+                    : 'Tarama sırasında beklenmeyen bir hata oluştu.',
                 scanState: { phase: 'done', processed: 0, total, cancelled: true },
               });
             } finally {
@@ -156,7 +179,12 @@ export default function ScanScreen() {
       });
 
       updateScanEntry(id, {
-        scanState: { phase: 'done', processed: result.processed, total, cancelled: result.cancelled },
+        scanState: {
+          phase: 'done',
+          processed: result.processed,
+          total,
+          cancelled: result.cancelled,
+        },
       });
     }
   }
@@ -197,11 +225,19 @@ export default function ScanScreen() {
       const threshold = await getMatchThreshold();
       const accessToken = await getDownloadToken();
 
-      updateScanEntry(id, { googlePhotosState: { phase: 'matching', processed: 0, total: items.length } });
-
-      const found = await matchGooglePhotosItems(items, referenceEmbedding, threshold, accessToken, (processed, total) => {
-        updateScanEntry(id, { googlePhotosState: { phase: 'matching', processed, total } });
+      updateScanEntry(id, {
+        googlePhotosState: { phase: 'matching', processed: 0, total: items.length },
       });
+
+      const found = await matchGooglePhotosItems(
+        items,
+        referenceEmbedding,
+        threshold,
+        accessToken,
+        (processed, total) => {
+          updateScanEntry(id, { googlePhotosState: { phase: 'matching', processed, total } });
+        }
+      );
 
       const others = getScanEntry(id).matches.filter((m) => m.source !== 'google-photos');
       updateScanEntry(id, {
@@ -222,7 +258,10 @@ export default function ScanScreen() {
 
   async function handleClearCache() {
     await clearScanCache();
-    Alert.alert('Tamam', 'Tarama önbelleği temizlendi. Bir sonraki tarama tüm fotoğrafları yeniden işleyecek.');
+    Alert.alert(
+      'Tamam',
+      'Tarama önbelleği temizlendi. Bir sonraki tarama tüm fotoğrafları yeniden işleyecek.'
+    );
   }
 
   const { scanState, matches, error, googlePhotosState } = entry;
@@ -241,7 +280,8 @@ export default function ScanScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>
-          Bu arkadaş için kayıtlı bir yüz profili yok. Önce net bir fotoğraf ekleyerek profili güncelle.
+          Bu arkadaş için kayıtlı bir yüz profili yok. Önce net bir fotoğraf ekleyerek profili
+          güncelle.
         </Text>
       </View>
     );
@@ -276,7 +316,8 @@ export default function ScanScreen() {
       )}
       {googlePhotosState.phase === 'waiting-for-selection' && (
         <Text style={styles.progressText}>
-          Tarayıcıda açılan Google Photos ekranında fotoğraf seç, seçim bitince buraya otomatik dönülecek.
+          Tarayıcıda açılan Google Photos ekranında fotoğraf seç, seçim bitince buraya otomatik
+          dönülecek.
         </Text>
       )}
       {googlePhotosState.phase === 'matching' && (
@@ -337,154 +378,162 @@ export default function ScanScreen() {
         <Text style={styles.clearCacheText}>Tarama önbelleğini temizle</Text>
       </Pressable>
 
-      <Modal visible={previewUri !== null} transparent animationType="fade" onRequestClose={() => setPreviewUri(null)}>
+      <Modal
+        visible={previewUri !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewUri(null)}
+      >
         <Pressable style={styles.previewBackdrop} onPress={() => setPreviewUri(null)}>
-          {previewUri && <Image source={{ uri: previewUri }} style={styles.previewImage} resizeMode="contain" />}
+          {previewUri && (
+            <Image source={{ uri: previewUri }} style={styles.previewImage} resizeMode="contain" />
+          )}
         </Pressable>
       </Modal>
     </ScrollView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    padding: spacing.xl,
-    gap: spacing.lg,
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: spacing.xl,
-    backgroundColor: colors.background,
-  },
-  scanButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.full,
-    minWidth: 240,
-    alignItems: 'center',
-    ...shadowSm,
-  },
-  scanButtonDisabled: {
-    opacity: 0.6,
-  },
-  cancelButton: {
-    backgroundColor: colors.danger,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.full,
-    minWidth: 240,
-    alignItems: 'center',
-    ...shadowSm,
-  },
-  scanButtonText: {
-    color: colors.white,
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  googlePhotosButton: {
-    backgroundColor: colors.primaryLight,
-    paddingVertical: 14,
-    paddingHorizontal: spacing.xl,
-    borderRadius: radius.full,
-    minWidth: 240,
-    alignItems: 'center',
-  },
-  googlePhotosButtonText: {
-    color: colors.primary,
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  backgroundHint: {
-    fontSize: 12,
-    color: colors.textMuted,
-    textAlign: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  progressBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  progressText: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  resultSummary: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    fontWeight: '600',
-  },
-  errorBox: {
-    backgroundColor: colors.dangerLight,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    width: '100%',
-  },
-  errorText: {
-    color: colors.dangerDark,
-  },
-  grid: {
-    width: '100%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  gridItem: {
-    width: '31.5%',
-    aspectRatio: 1,
-    borderRadius: radius.sm,
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: colors.surface,
-    ...shadowSm,
-  },
-  gridImage: {
-    width: '100%',
-    height: '100%',
-  },
-  gridSource: {
-    position: 'absolute',
-    top: 4,
-    left: 4,
-    fontSize: 14,
-  },
-  gridScore: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    color: colors.white,
-    fontSize: 11,
-    fontWeight: '700',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  clearCacheButton: {
-    paddingVertical: spacing.sm,
-  },
-  clearCacheText: {
-    fontSize: 12,
-    color: colors.textMuted,
-    textDecorationLine: 'underline',
-  },
-  previewBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  previewImage: {
-    width: '100%',
-    height: '80%',
-  },
-});
+const createStyles = ({ colors, shadowSm }: Theme) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.background,
+      alignItems: 'center',
+      padding: spacing.xl,
+      gap: spacing.lg,
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: spacing.xl,
+      backgroundColor: colors.background,
+    },
+    scanButton: {
+      backgroundColor: colors.primary,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.xl,
+      borderRadius: radius.full,
+      minWidth: 240,
+      alignItems: 'center',
+      ...shadowSm,
+    },
+    scanButtonDisabled: {
+      opacity: 0.6,
+    },
+    cancelButton: {
+      backgroundColor: colors.danger,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.xl,
+      borderRadius: radius.full,
+      minWidth: 240,
+      alignItems: 'center',
+      ...shadowSm,
+    },
+    scanButtonText: {
+      color: colors.white,
+      fontWeight: '700',
+      fontSize: 16,
+    },
+    googlePhotosButton: {
+      backgroundColor: colors.primaryLight,
+      paddingVertical: 14,
+      paddingHorizontal: spacing.xl,
+      borderRadius: radius.full,
+      minWidth: 240,
+      alignItems: 'center',
+    },
+    googlePhotosButtonText: {
+      color: colors.primary,
+      fontWeight: '700',
+      fontSize: 16,
+    },
+    backgroundHint: {
+      fontSize: 12,
+      color: colors.textMuted,
+      textAlign: 'center',
+      paddingHorizontal: spacing.md,
+    },
+    progressBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+    },
+    progressText: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: spacing.md,
+    },
+    resultSummary: {
+      fontSize: 13,
+      color: colors.textSecondary,
+      fontWeight: '600',
+    },
+    errorBox: {
+      backgroundColor: colors.dangerLight,
+      borderRadius: radius.md,
+      padding: spacing.md,
+      width: '100%',
+    },
+    errorText: {
+      color: colors.dangerDark,
+    },
+    grid: {
+      width: '100%',
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: spacing.sm,
+    },
+    gridItem: {
+      width: '31.5%',
+      aspectRatio: 1,
+      borderRadius: radius.sm,
+      overflow: 'hidden',
+      position: 'relative',
+      backgroundColor: colors.surface,
+      ...shadowSm,
+    },
+    gridImage: {
+      width: '100%',
+      height: '100%',
+    },
+    gridSource: {
+      position: 'absolute',
+      top: 4,
+      left: 4,
+      fontSize: 14,
+    },
+    gridScore: {
+      position: 'absolute',
+      bottom: 4,
+      right: 4,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      color: colors.white,
+      fontSize: 11,
+      fontWeight: '700',
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+      overflow: 'hidden',
+    },
+    clearCacheButton: {
+      paddingVertical: spacing.sm,
+    },
+    clearCacheText: {
+      fontSize: 12,
+      color: colors.textMuted,
+      textDecorationLine: 'underline',
+    },
+    previewBackdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.9)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    previewImage: {
+      width: '100%',
+      height: '80%',
+    },
+  });

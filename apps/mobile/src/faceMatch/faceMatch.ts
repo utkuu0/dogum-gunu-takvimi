@@ -1,4 +1,5 @@
 import { Image } from 'react-native';
+import { File, Paths } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import FaceDetection, { type Face } from '@react-native-ml-kit/face-detection';
 import { decode as decodeJpeg } from 'jpeg-js';
@@ -32,12 +33,46 @@ export class NoFaceDetectedError extends Error {
 
 let modelPromise: Promise<TensorflowModel> | null = null;
 
+// Yayın (release) sürümlerinde Metro asset'i "assets_models_mobilefacenet" gibi bir Android
+// kaynak adına çevirir ve react-native-fast-tflite bunu URL sanıp MalformedURLException verir.
+// Bu yüzden orada modeli bir kez indirip cihazda saklıyor, file:// adresiyle yüklüyoruz.
+const MODEL_URL =
+  'https://raw.githubusercontent.com/utkuu0/dogum-gunu-takvimi/master/apps/mobile/assets/models/mobilefacenet.tflite';
+const MODEL_FILE_NAME = 'mobilefacenet.tflite';
+const MODEL_FILE_SIZE = 5233552;
+
+async function ensureModelFileUri(): Promise<string> {
+  const file = new File(Paths.document, MODEL_FILE_NAME);
+  if (file.exists && file.size === MODEL_FILE_SIZE) {
+    return file.uri;
+  }
+  const downloaded = await File.downloadFileAsync(MODEL_URL, file, { idempotent: true });
+  if (downloaded.size !== MODEL_FILE_SIZE) {
+    throw new Error(
+      'Yüz tanıma modeli eksik indirildi, internet bağlantını kontrol edip tekrar dene.'
+    );
+  }
+  return downloaded.uri;
+}
+
+async function loadModel(): Promise<TensorflowModel> {
+  try {
+    // Metro'nun modeli statik asset olarak paketleyebilmesi için require() gerekiyor.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return await loadTensorflowModel(require('../../assets/models/mobilefacenet.tflite'), []);
+  } catch {
+    const uri = await ensureModelFileUri();
+    return loadTensorflowModel({ url: uri }, []);
+  }
+}
+
 /** Modeli tek seferliğine belleğe yükler ve tekrar kullanır. */
 export function getFaceMatchModel(): Promise<TensorflowModel> {
   if (!modelPromise) {
-    // Metro'nun modeli statik asset olarak paketleyebilmesi için require() gerekiyor.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    modelPromise = loadTensorflowModel(require('../../assets/models/mobilefacenet.tflite'), []);
+    modelPromise = loadModel().catch((err) => {
+      modelPromise = null; // hata kalıcı olmasın, sonraki denemede tekrar dene
+      throw err;
+    });
   }
   return modelPromise;
 }
@@ -91,7 +126,9 @@ async function detectFaces(uri: string): Promise<DetectionSource> {
 
 function pickLargestFace(faces: Face[]): Face {
   return faces.reduce((largest, face) =>
-    face.frame.width * face.frame.height > largest.frame.width * largest.frame.height ? face : largest
+    face.frame.width * face.frame.height > largest.frame.width * largest.frame.height
+      ? face
+      : largest
   );
 }
 
@@ -230,7 +267,9 @@ export async function getAllFaceEmbeddings(photoUri: string): Promise<number[][]
  * eşleşmede ciddi bir UI kasmasına yol açıyor.
  */
 export async function createThumbnail(uri: string, maxDimension = 300): Promise<string> {
-  const imageRef = await ImageManipulator.manipulate(uri).resize({ width: maxDimension }).renderAsync();
+  const imageRef = await ImageManipulator.manipulate(uri)
+    .resize({ width: maxDimension })
+    .renderAsync();
   const result = await imageRef.saveAsync({ format: SaveFormat.JPEG, compress: 0.6 });
   return result.uri;
 }
